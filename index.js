@@ -17,6 +17,8 @@ function range(x) {
     return out
 }
 
+function removeId() {}
+
 function getRandCoor() {
     let c = Math.random()*200 - 100
     c = Math.floor(c)
@@ -24,14 +26,68 @@ function getRandCoor() {
     return c
 }
 
+class Road {
+    constructor(to, len) {
+        this.to = to
+        this.len = len
+    }
+}
+
 class City {
-    constructor(id, neighbours) {
+    constructor(id) {
         this.id = id
-        this.neighbours = neighbours // array of ids, not objects
+        this.neighbours = [] // Array of cities
+        this.roads = [] // Array of Road objects
+
         //Potencjalny bug: koordynaty mogą się powtarzać
         this.x = getRandCoor()
         this.y = getRandCoor()
     }
+    
+    distTo(city) {
+        // assert(this.neighbours.includes(city))
+        const dx = this.x - city.x
+        const dy = this.y - city.y
+        const dist = (dx**2 + dy**2)**0.5
+        return dist
+    }
+
+    setNeighbours(cities) {
+        assert(this.neighbours.length === 0)
+        this.neighbours = cities
+    }
+
+    connect(city) {
+        // This has to be called once per pair of cities
+        assert(this.neighbours.length > 0)
+        const dist = this.distTo(city)
+        const roadTo = Road(city, dist)
+        const roadFrom = Road(this, dist)
+
+        this.roads.push(roadTo)
+        city.roads.push(roadFrom)
+    }
+}
+
+class World {
+    constructor(howManyCities, howManyRoadsPerCity) {
+        this.cities = range(howManyCities).map(id => City(id))
+        for (let id = 0; id < howManyCities; id++) {
+            const city = this.cities[id]
+            // const neighbours = this.cities.filter(c => c != city)
+            while (city.neighbours.length < howManyRoadsPerCity) {
+                randId = Math.floor(Math.random() * howManyCities)
+                assert(randId !== howManyCities)
+                if (randId === id) continue;
+
+                const neighbour = cities[randId]
+                if (city.neighbours.includes(neighbour)) continue;
+            }
+        }
+        // this.howManyRoadsPerCity = howManyRoadsPerCity
+    }
+
+
 }
 
 function getDist(city1, city2) {
