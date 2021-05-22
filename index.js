@@ -58,14 +58,6 @@ class City {
         this.y = getRandCoor()
     }
 
-    // distTo(city) {
-    //     return this.distances[city.id]
-    // }
-
-    // get neighbours() {
-    //     return Object.keys(this.distTo)
-    // }
-
     connect(city, dist) {
         this.neighbours.push(city)
         this.distTo[city.id] = dist
@@ -129,7 +121,7 @@ class World {
     }
 
     __bfsSolver(path){}
-    
+
     __dfsSolver(path, bestPath=undefined){
         if (path.nodes.length === this.cities.length) {
             if (path.end.neighbours.includes(this.cities[0])) {
