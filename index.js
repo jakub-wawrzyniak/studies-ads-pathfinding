@@ -1,10 +1,10 @@
 'use strict';
 
 const HOW_MANY_CITIES = 4
-const HOW_MANY_ROADS = 1 // 0.8 = 80% of all roads
-function assert(cond) {
+const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+function assert(cond, warn="") {
     if (!cond) {
-        throw Error
+        throw Error(warn)
     }
 }
 
@@ -17,8 +17,6 @@ function range(x) {
     return out
 }
 
-function removeId() {}
-
 function getRandCoor() {
     let c = Math.random()*200 - 100
     c = Math.floor(c)
@@ -26,107 +24,84 @@ function getRandCoor() {
     return c
 }
 
-class Road {
-    constructor(to, len) {
-        this.to = to
-        this.len = len
+function newton(arr) {
+    assert(arr.length >= 2)
+    const out = []
+    for (let id1 = 0; id1 < arr.length-1; id1++) {
+        for (let id2 = id1+1; id2 < arr.length; id2++) {
+            out.push([
+                arr[id1], arr[id2]
+            ])
+        }
     }
+    return out
+}
+
+function getRandArr(arr, count) {
+    // Randomly chooses specified no
+    // of elements from a given array
+    const out = arr
+    while(out.length > count) {
+        const id = Math.floor(Math.random() * out.length)
+        out.splice(id, 1)
+    }
+    return out
 }
 
 class City {
     constructor(id) {
         this.id = id
-        this.neighbours = [] // Array of cities
-        this.roads = [] // Array of Road objects
-
+        this.distTo = {} // {city.id: dist}
+        this.neighbours = [] // [city1, city2, ...]
         //Potencjalny bug: koordynaty mogą się powtarzać
         this.x = getRandCoor()
         this.y = getRandCoor()
     }
-    
-    distTo(city) {
-        // assert(this.neighbours.includes(city))
-        const dx = this.x - city.x
-        const dy = this.y - city.y
-        const dist = (dx**2 + dy**2)**0.5
-        return dist
+
+    // distTo(city) {
+    //     return this.distances[city.id]
+    // }
+
+    // get neighbours() {
+    //     return Object.keys(this.distTo)
+    // }
+
+    connect(city, dist) {
+        this.neighbours.push(city)
+        this.distTo[city.id] = dist
     }
-
-    setNeighbours(cities) {
-        assert(this.neighbours.length === 0)
-        this.neighbours = cities
-    }
-
-    connect(city) {
-        // This has to be called once per pair of cities
-        assert(this.neighbours.length > 0)
-        const dist = this.distTo(city)
-        const roadTo = Road(city, dist)
-        const roadFrom = Road(this, dist)
-
-        this.roads.push(roadTo)
-        city.roads.push(roadFrom)
-    }
-}
-
-class World {
-    constructor(howManyCities, howManyRoadsPerCity) {
-        this.cities = range(howManyCities).map(id => City(id))
-        for (let id = 0; id < howManyCities; id++) {
-            const city = this.cities[id]
-            // const neighbours = this.cities.filter(c => c != city)
-            while (city.neighbours.length < howManyRoadsPerCity) {
-                randId = Math.floor(Math.random() * howManyCities)
-                assert(randId !== howManyCities)
-                if (randId === id) continue;
-
-                const neighbour = cities[randId]
-                if (city.neighbours.includes(neighbour)) continue;
-            }
-        }
-        // this.howManyRoadsPerCity = howManyRoadsPerCity
-    }
-
-
 }
 
 function getDist(city1, city2) {
-    assert(city1.neighbours.includes(city2.id))
     const dx = city1.x - city2.x
     const dy = city1.y - city2.y
     const dist = (dx**2 + dy**2)**0.5
-    // assert(dist != 0)
     return dist
 }
 
-function getNeighbours(ids, thisId) {
-    const howMany = Math.floor(HOW_MANY_CITIES*HOW_MANY_ROADS)
-    if (howMany === ids.length) return ids.filter(id => id !== thisId);
-    assert(howMany < ids.length)
-    
-    const out = []
-    while (out.length < howMany) {
-        const randId = Math.floor(Math.random() * ids.length)
-        if (out.includes(randId)) continue;
-        out.push(randId);
-    }
-    
-    if (out.includes(thisId)) {
-        const pos = out.indexOf(thisId)
-        out.splice(pos, 1)
-    }
-    return out
-}
 
-function getCities() {
-    const ids = range(HOW_MANY_CITIES)
-    const cities = [];
-    for (let id of ids) {
-        const neighbours = getNeighbours(ids, id)
-        const city = new City(id, neighbours)
-        cities.push(city)
+class Path {
+    constructor(start) {
+        this.nodes = [start] // Array of City objects
+        this.dist = 0
     }
-    return cities
+
+    get end() {
+        return this.nodes[this.nodes.length-1]
+    }
+
+    extend(city) {
+        assert(this.end.neighbours.includes(city))
+        this.dist += this.end.distTo[city.id]
+        this.nodes.push(city)
+    }
+
+    copy() {
+        const copy = new Path()
+        copy.nodes = [...this.nodes]
+        copy.dist = this.dist
+        return copy
+    }
 }
 
 function chooseBetterPath(path1, path2) {
@@ -136,89 +111,70 @@ function chooseBetterPath(path1, path2) {
     return path2;
 }
 
+class World {
+    constructor(howManyCities, fractionOfRoads) {
+        this.cities = range(howManyCities).map(id => new City(id))
 
-//Optymalizacja: najpierw policz wszystkie drogi
-function salesmanDFS(cities, path={nodes: [cities[0]], dist: 0}, bestPath=undefined) {
-    if (cities.length === path.nodes.length)
-        return chooseBetterPath(path, bestPath);
+        const pairs = newton(this.cities)
+        const noOfRoads = Math.ceil(fractionOfRoads * pairs.length)
+        const pairsToConnect = getRandArr(pairs, noOfRoads)
+        // TODO: Check connection validity
 
-    const thisCity = path.nodes[path.nodes.length-1]
-    const nextCities = thisCity.neighbours.filter(id => !path.nodes.includes(cities[id]))
-    assert(nextCities)
-    for (let cityId of nextCities) {
-        const city = cities[cityId]
-        // Potencjalne przyspieszenie: jeśli widzisz, że droga jest już dłuższa od bestPath,
-        // to szukaj dalej
-        const newPath = {}
-        newPath.nodes = [...path.nodes, city]
-        newPath.dist = path.dist + getDist(thisCity, city)
-        bestPath = salesmanDFS(cities, newPath, bestPath)
+        for (let pair of pairsToConnect) {
+            const [city1, city2] = pair;
+            const dist = getDist(city1, city2)
+            city1.connect(city2, dist)
+            city2.connect(city1, dist)
+        }
     }
-    return bestPath
-}
 
-function permutations(arr) {
-    assert(arr.length > 0)
-    if (arr.length == 1) return [[...arr]]; //Worthless ...?
-    // if (arr.length == 2) return [
-    //     [...arr],
-    //     [...arr.reverse()] //Worthless ...?
-    // ]
+    __bfsSolver(path){}
+    
+    __dfsSolver(path, bestPath=undefined){
+        if (path.nodes.length === this.cities.length) {
+            if (path.end.neighbours.includes(this.cities[0])) {
+                path.extend(this.cities[0])
+                return chooseBetterPath(path, bestPath)
+            }
+            return bestPath
+        }
 
-    const out = []
-    for (let el of arr) {
-        const rest = permutations(
-            arr.filter(e => e !== el)
+        const nextCities = path.end.neighbours.filter(
+            city => !path.nodes.includes(city)
         )
 
-        const perm = rest.map(p => [el, ...p])
-        out.push(
-            ...rest.map( perm => [el, ...perm])
-        )
+        for (let city of nextCities) {
+            const newPath = path.copy()
+            newPath.extend(city)
+            bestPath = this.__dfsSolver(newPath, bestPath)
+        }
+
+        return bestPath
     }
-    return out
-}
+    __greedySolver(path){}
 
-function getFullDist(cities) {
-    if (cities.length == 2) return getDist(...cities)
-    const first = cities.shift()
-    const dist = getDist(first, cities[0])
-    return dist + getFullDist(cities)
-}
-
-function salesmanBFS(cities) {
-    // const paths = []
-    // for (let cityId of cities[0].neighbours) {
-    //     const city = cities[cityId]
-    //     const path = {nodes: [cities[0], city]}
-    //     path.dist = getDist(cities[0], city)
-    //     paths.push(path)
-    // }
-
-    // while (paths.every(e => e.length === cities.length))
-    const perms = permutations(cities)
-    const paths = perms.map(perm => { return {
-        nodes: perm,
-        dist: getFullDist(perm)
-    }})
+    salesmanSolver(method) {
+        const path = new Path(this.cities[0])
+        const solver = {
+            'bfs': this.__bfsSolver,
+            'dfs': this.__dfsSolver,
+            'greedy': this.__greedySolver
+        }[method].bind(this)
+        return solver(path)
+    }
 }
 
 function main() {
-    const cities = getCities()
-    const t = Date.now()
-    const path = salesmanDFS(cities)
-    // console.log(cities)
-    console.log(path)
-    const t0 = Date.now()
-    console.log(`Computed in ${(t0-t)/1000}s`)
+    let t;
+    t = Date.now()
+    const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
+    console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
+    
+    t = Date.now()
+    const path = world.salesmanSolver('dfs')
+    console.log(`Path found in ${(Date.now()-t)/1000}s`)
+    
+    // console.log(path)
 }
 
-// main()
-// console.log(permutations([1, 2, 3]))
-// console.log(permutations([1, 2]))
-// const perms = permutations(getCities())
-// perms.forEach( p => {
-//     console.log(getFullDist(p))
-// })
-
-console.log(getFullDist(getCities()))
+main()
