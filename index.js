@@ -1,7 +1,8 @@
 'use strict';
 
-const HOW_MANY_CITIES = 4
+const HOW_MANY_CITIES = 10
 const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+
 function assert(cond, warn="") {
     if (!cond) {
         throw Error(warn)
@@ -53,6 +54,7 @@ class City {
         this.id = id
         this.distTo = {} // {city.id: dist}
         this.neighbours = [] // [city1, city2, ...]
+        this.areNeighboursSorted = false
         //Potencjalny bug: koordynaty mogą się powtarzać
         this.x = getRandCoor()
         this.y = getRandCoor()
@@ -61,6 +63,16 @@ class City {
     connect(city, dist) {
         this.neighbours.push(city)
         this.distTo[city.id] = dist
+    }
+    
+    sortNeighbours() {
+        if (!this.areNeighboursSorted) {
+            function compFn (c1, c2) {
+                return this.distTo[c1.id] - this.distTo[c2.id]
+            }
+            this.neighbours.sort(compFn.bind(this))
+            this.areNeighboursSorted = true
+        }
     }
 }
 
@@ -86,6 +98,7 @@ class Path {
         assert(this.end.neighbours.includes(city))
         this.dist += this.end.distTo[city.id]
         this.nodes.push(city)
+        return this
     }
 
     copy() {
@@ -120,12 +133,36 @@ class World {
         }
     }
 
-    __bfsSolver(path){}
+    __bfsSolver(path){
+        let paths = path.end.neighbours.map(n =>
+            path.copy().extend(n))
+
+        while(paths[0].nodes.length !== this.cities.length) {
+            const newPaths = []
+            for (let path of paths) {
+                for (let city of path.end.neighbours) {
+                    newPaths.push(path.copy().extend(city))
+                }
+            }
+            paths = newPaths
+        }
+
+        let bestPath = undefined;
+        const startCity = path.nodes[0]
+        for (let path of paths) {
+            if (path.end.neighbours.includes(startCity)) {
+                path.extend(startCity)
+                bestPath = chooseBetterPath(path, bestPath)
+            }
+        }
+
+        return bestPath
+    }
 
     __dfsSolver(path, bestPath=undefined){
         if (path.nodes.length === this.cities.length) {
-            if (path.end.neighbours.includes(this.cities[0])) {
-                path.extend(this.cities[0])
+            if (path.end.neighbours.includes(path.nodes[0])) {
+                path.extend(path.nodes[0])
                 return chooseBetterPath(path, bestPath)
             }
             return bestPath
@@ -134,7 +171,7 @@ class World {
         const nextCities = path.end.neighbours.filter(
             city => !path.nodes.includes(city)
         )
-
+        if (nextCities.length === 0) return bestPath
         for (let city of nextCities) {
             const newPath = path.copy()
             newPath.extend(city)
@@ -143,7 +180,29 @@ class World {
 
         return bestPath
     }
-    __greedySolver(path){}
+
+    __greedySolver(path) {
+        if (path.nodes.length === this.cities.length) {
+            if (path.end.neighbours.includes(path.nodes[0])) {
+                return path.extend(path.nodes[0])
+            }
+            return -1
+        }
+
+        path.end.sortNeighbours()
+        const nextCities = path.end.neighbours.filter(
+            city => !path.nodes.includes(city)
+        )
+
+        if (nextCities.length === 0) return -1
+        for (let city of nextCities) {
+            let newPath = path.copy().extend(city)
+            newPath = this.__greedySolver(newPath)
+            if (newPath !== -1) return newPath
+        }
+
+        return -1
+    }
 
     salesmanSolver(method) {
         const path = new Path(this.cities[0])
@@ -162,11 +221,13 @@ function main() {
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
-    t = Date.now()
-    const path = world.salesmanSolver('dfs')
-    console.log(`Path found in ${(Date.now()-t)/1000}s`)
-    
-    // console.log(path)
+    for (let method of ['greedy', 'dfs']) {
+        console.log()
+        t = Date.now()
+        let path = world.salesmanSolver(method)
+        console.log(`${method}: path found in ${(Date.now()-t)/1000}s`)
+        console.log(`Distance: ${path.dist}`)
+    }
 }
 
 main()
