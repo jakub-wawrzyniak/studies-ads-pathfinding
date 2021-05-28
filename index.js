@@ -4,6 +4,7 @@ const SIZE = 500
 const CITY_RAD = 5
 const HOW_MANY_CITIES = 20
 const FRACTION_OF_ROADS = 0.8
+const SOLVER_METHOD = "greedy" // bfs, dfs, mst, greedy
 
 function translateCoor(coor) {
     const off = 100 + CITY_RAD
@@ -54,17 +55,25 @@ function drawPath(ctx, path) {
     ctx.stroke()
 }
 
+function printInfo(path, world) {
+    document.getElementById('no-cities').innerText = world.cities.length
+    document.getElementById('no-roads').innerText = world.roads.length
+    document.getElementById('%-roads').innerText = `${FRACTION_OF_ROADS*100}%`
+    document.getElementById('method').innerText = SOLVER_METHOD
+    document.getElementById('len').innerText = Math.ceil(path.dist)
+}
+
 function run() {
     const canvas = document.getElementById("canvas")
     const ctx = canvas.getContext('2d')
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
-    const path = world.salesmanSolver('greedy')
+    const path = world.salesmanSolver(SOLVER_METHOD)
+    // const path = world.findPath(0, 5)
     
-    console.log(world.cities)
     drawRoads(ctx, world)
     drawPath(ctx, path)
     drawCities(ctx, world)
-    
+    printInfo(path, world)
 }
 
 export { run }

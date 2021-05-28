@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Path finding visualtation</title>
+    <title>Pathfinding</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -13,8 +13,37 @@
 
 <body>
     <main>
-        <h2>Path finding visualtation</h2>
+        <h2>Pathfinding visualtation</h2>
         <canvas id="canvas" width="500" height="500"></canvas>
+        <div id="wrapper">
+            <div id="info">
+                <table>
+                    <tr>
+                        <td>No of cities:</td>
+                        <td id="no-cities"></td>
+                    </tr>
+                    <tr>
+                        <td>No of roads:</td>
+                        <td id="no-roads"></td>
+                    </tr>
+                    <tr>
+                        <td>% of possible roads:</td>
+                        <td id="%-roads"></td>
+                    </tr>
+                    <tr>
+                        <td>Pathfinding method:<td>
+                        <td id="method"></td>
+                    </tr>
+                    <tr>
+                        <td>Path length:<td>
+                        <td id="len"></td>
+                    </tr>
+                </table>
+            </div>
+            <div id="controls">
+                <p style="max-width:500px;">To modify behaviour of this app, visit index.js and change constants at the beginning of the file.</p>
+            </div>
+        </div>
     </main>
     <script type="module">
         import { run } from "./index.js"
