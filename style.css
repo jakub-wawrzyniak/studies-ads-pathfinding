@@ -1,3 +1,15 @@
+* {
+    --theme-color: #222;
+    font-family: Roboto;
+}
+
+h2 {
+    text-align: center;
+    color: var(--theme-color);
+    font-weight: 300;
+    font-size: 2rem;
+}
+
 body {
     min-width: 95vw;
     min-height: 80vh; 
@@ -5,6 +17,7 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 canvas {
-    border: 5px solid #575757;
+    border: 2px solid var(--theme-color);
 }

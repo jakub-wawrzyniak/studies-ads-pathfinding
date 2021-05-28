@@ -126,10 +126,9 @@ class World {
 
         const pairs = newton(this.cities)
         const noOfRoads = Math.ceil(fractionOfRoads * pairs.length)
-        const pairsToConnect = getRandArr(pairs, noOfRoads)
-        // TODO: Check connection validity
+        this.roads = getRandArr(pairs, noOfRoads)
 
-        for (let pair of pairsToConnect) {
+        for (let pair of this.roads) {
             const [city1, city2] = pair;
             const dist = getDist(city1, city2)
             city1.connect(city2, dist)
