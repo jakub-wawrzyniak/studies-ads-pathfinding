@@ -1,6 +1,6 @@
 'use strict';
 
-const HOW_MANY_CITIES = 6
+const HOW_MANY_CITIES = 500
 const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
 
 function assert(cond, warn="") {
@@ -225,10 +225,19 @@ class World {
 
     __mstSolver(path) {
         if (this.mstTree === undefined) this.makeMstTree();
-        const id = path.nodes[0].id
-        const start = this.mstTree.find(city => city.id === id)
-        path = new Path(start)
-        return this.__dfsSolver(path)
+        const currentCity = path.end
+        const currentId = currentCity.id
+        const nextCities = this.mstTree
+            .find(city => city.id === currentId)
+            .neighbours.map(n => this.cities[n.id])
+            .filter(n => !path.nodes.includes(n))
+
+        for (let city of nextCities) {
+            let nextPath = path.copy().extend(city)
+            nextPath = this.__mstSolver(nextPath)
+            path = nextPath.extend(currentCity)
+        }
+        return path
     }
 
     __greedySolver(path) {
@@ -254,8 +263,8 @@ class World {
         return -1
     }
 
-    salesmanSolver(method) {
-        const path = new Path(this.cities[0])
+    salesmanSolver(method, start=this.cities[0]) {
+        const path = new Path(start)
         const solver = {
             'bfs': this.__bfsSolver,
             'dfs': this.__dfsSolver,
@@ -272,16 +281,15 @@ function main() {
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
-    for (let method of ['bfs', 'dfs', 'mst', 'greedy']) {
+    const paths=[]
+    for (let method of ['mst', 'greedy']) {
         console.log()
         t = Date.now()
         let path = world.salesmanSolver(method)
+        paths.push(path)
         console.log(`${method}: path found in ${(Date.now()-t)/1000}s`)
         console.log(`Distance: ${path.dist}`)
     }
-    // let path = new Path(world.cities[0])
-    // let out = world.__mstSolver(path)
-    // console.log(out)
 }
 
 main()
