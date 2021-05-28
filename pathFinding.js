@@ -9,13 +9,8 @@ function assert(cond, warn="") {
     }
 }
 
-// TODO: Wyczyść to
 function range(x) {
-    let out = []
-    for (let i = 0; i < x; i++) {
-        out.push(i)
-    }
-    return out
+    return [...Array(x).keys()]
 }
 
 function getRandCoor() {
@@ -26,6 +21,8 @@ function getRandCoor() {
 }
 
 function newton(arr) {
+    // Returns unique pairs of
+    // elements of a given array
     assert(arr.length >= 2)
     const out = []
     for (let id1 = 0; id1 < arr.length-1; id1++) {
