@@ -1,7 +1,7 @@
 'use strict';
 
-const HOW_MANY_CITIES = 500
-const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+const HOW_MANY_CITIES = 300
+const FRACTION_OF_ROADS = 0.6 // 0.8 = 80% of all roads
 
 function assert(cond, warn="") {
     if (!cond) {
@@ -263,7 +263,10 @@ class World {
         return -1
     }
 
-    salesmanSolver(method, start=this.cities[0]) {
+    salesmanSolver(method, startCityId=0) {
+        assert(0 <= startCityId < this.cities.length,
+            "Provided startCityId is out of range")
+        const start = this.cities[startCityId]
         const path = new Path(start)
         const solver = {
             'bfs': this.__bfsSolver,
@@ -273,16 +276,52 @@ class World {
         }[method].bind(this)
         return solver(path)
     }
+
+    mergePaths(paths) {
+        for (let path1 of paths.from1) {
+            for (let path2 of paths.from2) {
+                if (path1.end == path2.end) {
+                    const path = path1.copy()
+                    path.nodes.pop()
+                    path2.nodes.reverse().forEach(
+                        n => path.extend(n))
+                    return path
+        }}}
+        return -1
+    }
+
+    findPath(city1Id, city2Id) {
+        const paths = {
+            from1: [new Path(this.cities[city1Id])],
+            from2: [new Path(this.cities[city2Id])]
+        }
+        let path = this.mergePaths(paths);
+        while (path === -1) {
+            for (let [key, from] of Object.entries(paths)) {
+                const newPaths = []
+                for (let p of from) {
+                    const nextCities = p.end.neighbours.filter(
+                        n => !p.nodes.includes(n))
+                    nextCities.forEach(
+                        c => newPaths.push(p.copy().extend(c)))
+                }
+                // from = newPaths
+                paths[key] = newPaths
+            }
+            path = this.mergePaths(paths)
+        }
+        return path
+    }
 }
 
-function main() {
+function testSalesman() {
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
     const paths=[]
-    for (let method of ['mst', 'greedy']) {
+    for (let method of ['bfs', 'dfs', 'mst', 'greedy']) {
         console.log()
         t = Date.now()
         let path = world.salesmanSolver(method)
@@ -292,4 +331,24 @@ function main() {
     }
 }
 
-main()
+function testBidirectSearch() {
+    let t;
+    t = Date.now()
+    const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
+    console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
+    
+    const paths = []
+    for (let i = 0; i < 1; i++) {
+        const city1Id = Math.floor(HOW_MANY_CITIES*Math.random())
+        const city2Id = Math.floor(HOW_MANY_CITIES*Math.random())
+        console.log()
+        t = Date.now()
+        let path = world.findPath(city1Id, city2Id)
+        console.log(`Path between ${city1Id} and ${city2Id} found in ${(Date.now()-t)/1000}s`)
+        console.log(`Distance: ${path.dist}; Nodes: ${path.nodes.length}`)
+        paths.push(path)
+    }
+}
+
+// testSalesman()
+testBidirectSearch()
