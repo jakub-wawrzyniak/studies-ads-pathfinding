@@ -1,7 +1,7 @@
 'use strict';
 
 const HOW_MANY_CITIES = 300
-const FRACTION_OF_ROADS = 0.6 // 0.8 = 80% of all roads
+const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
 
 function assert(cond, warn="") {
     if (!cond) {
@@ -55,7 +55,7 @@ class City {
         this.distTo = {} // {city.id: dist}
         this.neighbours = [] // [city1, city2, ...]
         this.areNeighboursSorted = false
-        //Potencjalny bug: koordynaty mogą się powtarzać
+
         this.x = getRandCoor()
         this.y = getRandCoor()
     }
@@ -351,4 +351,5 @@ function testBidirectSearch() {
 }
 
 // testSalesman()
-testBidirectSearch()
+// testBidirectSearch()
+export { World }
