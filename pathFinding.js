@@ -1,8 +1,5 @@
 'use strict';
 
-const HOW_MANY_CITIES = 300
-const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
-
 function assert(cond, warn="") {
     if (!cond) {
         throw Error(warn)
@@ -311,6 +308,8 @@ class World {
 }
 
 function testSalesman() {
+    const HOW_MANY_CITIES = 300
+    const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
@@ -328,6 +327,8 @@ function testSalesman() {
 }
 
 function testBidirectSearch() {
+    const HOW_MANY_CITIES = 300
+    const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
@@ -348,4 +349,3 @@ function testBidirectSearch() {
 
 // testSalesman()
 // testBidirectSearch()
-export { World }

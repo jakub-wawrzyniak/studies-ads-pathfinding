@@ -1,14 +1,14 @@
-import { World } from "./pathFinding.js"
+'use strict';
 
-const SIZE = 500
+const CANVAS_SIZE = 500
 const CITY_RAD = 5
-const HOW_MANY_CITIES = 20
-const FRACTION_OF_ROADS = 0.8
-const SOLVER_METHOD = "greedy" // bfs, dfs, mst, greedy
+const HOW_MANY_CITIES = 9
+const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+const SOLVER_METHOD = "bfs" // bfs, dfs, mst, greedy
 
 function translateCoor(coor) {
     const off = 100 + CITY_RAD
-    return (coor+off)*(SIZE/(off*2))
+    return (coor+off)*(CANVAS_SIZE/(off*2))
 }
 
 function drawCities(ctx, world) {
@@ -75,5 +75,3 @@ function run() {
     drawCities(ctx, world)
     printInfo(path, world)
 }
-
-export { run }
