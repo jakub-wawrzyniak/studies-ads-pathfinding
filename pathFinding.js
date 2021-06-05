@@ -307,7 +307,6 @@ class World {
                     nextCities.forEach(
                         c => newPaths.push(p.copy().extend(c)))
                 }
-                // from = newPaths
                 paths[key] = newPaths
                 path = this.mergePaths(paths)
                 if (path !== -1) break
@@ -347,22 +346,15 @@ class World {
 
         const updateDist = (pathTo, city, neighbour, startCityId) => {
             if (neighbour.id === startCityId) {return}
-            assert(pathTo[city.id].nodes[0].id === startCityId)
-            assert(pathTo[city.id].end.id == city.id)
             const newPath = pathTo[city.id].copy().extend(neighbour)
             if (pathTo[neighbour.id] === -1) pathTo[neighbour.id] = newPath
             else pathTo[neighbour.id] = chooseBetterPath(newPath, pathTo[neighbour.id])
-            assert(pathTo[neighbour.id].nodes[0].id === startCityId)
-            assert(pathTo[neighbour.id] !== -1)
-            assert(pathTo[neighbour.id].end.id === neighbour.id)
         }
 
         let bestPath = -1
         while(unprocessed1.length !== 0 || unprocessed2.length !== 0) {
             const nearest1 = popNearesetUnprocessed(unprocessed1, path1To)
             const nearest2 = popNearesetUnprocessed(unprocessed2, path2To)
-            assert(nearest1 !== undefined)
-            assert(nearest2 !== undefined)
             processed1.push(nearest1)
             processed2.push(nearest2)
 
@@ -422,7 +414,7 @@ function testBidirectSearch() {
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
     const paths = []
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 10; i++) {
         const city1Id = Math.floor(HOW_MANY_CITIES*Math.random())
         const city2Id = Math.floor(HOW_MANY_CITIES*Math.random())
         console.log()
@@ -435,5 +427,6 @@ function testBidirectSearch() {
     console.log("")
 }
 
+// Functions below can be used either in node.js or in the browser
 // testSalesman()
-testBidirectSearch()
+// testBidirectSearch()

@@ -1,10 +1,12 @@
 'use strict';
 
-const CANVAS_SIZE = 500
+const CANVAS_SIZE = 500 // dont touch this
 const CITY_RAD = 5
-const HOW_MANY_CITIES = 300
-const FRACTION_OF_ROADS = .5 // 0.8 = 80% of all roads
-const SOLVER_METHOD = "bfs" // bfs, dfs, mst, greedy
+const HOW_MANY_CITIES = 10
+const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+const SOLVER_MODE = "salesman" // bidirect, salesman
+const SOLVER_METHOD = "dfs" // bfs, dfs, mst, greedy
+// ^ matters only if SOLVER_MODE is "salesman"
 
 function translateCoor(coor) {
     const off = 100 + CITY_RAD
@@ -59,18 +61,22 @@ function printInfo(path, world) {
     document.getElementById('no-cities').innerText = world.cities.length
     document.getElementById('no-roads').innerText = world.roads.length
     document.getElementById('%-roads').innerText = `${FRACTION_OF_ROADS*100}%`
-    document.getElementById('method').innerText = SOLVER_METHOD
+    if (SOLVER_MODE === "bidirect")
+        document.getElementById('method').innerText = "bidirect dikstra"
+    else document.getElementById('method').innerText = SOLVER_METHOD
     document.getElementById('len').innerText = Math.ceil(path.dist)
+    document.getElementById('nodes').innerText = path.nodes.length
 }
 
 function run() {
     const canvas = document.getElementById("canvas")
     const ctx = canvas.getContext('2d')
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
-    // const path = world.salesmanSolver(SOLVER_METHOD)
-    // const path = world.findPath(0, 5)
-    const path = world.findPathDikstra(0, 5)
-    
+
+    const path = SOLVER_MODE === "bidirect"
+        ? world.findPathDikstra(0, 5)
+        : world.salesmanSolver(SOLVER_METHOD)
+
     drawRoads(ctx, world)
     drawPath(ctx, path)
     drawCities(ctx, world)
