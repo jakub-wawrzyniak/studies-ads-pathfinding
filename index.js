@@ -2,8 +2,8 @@
 
 const CANVAS_SIZE = 500
 const CITY_RAD = 5
-const HOW_MANY_CITIES = 9
-const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
+const HOW_MANY_CITIES = 300
+const FRACTION_OF_ROADS = .5 // 0.8 = 80% of all roads
 const SOLVER_METHOD = "bfs" // bfs, dfs, mst, greedy
 
 function translateCoor(coor) {
@@ -67,8 +67,9 @@ function run() {
     const canvas = document.getElementById("canvas")
     const ctx = canvas.getContext('2d')
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
-    const path = world.salesmanSolver(SOLVER_METHOD)
+    // const path = world.salesmanSolver(SOLVER_METHOD)
     // const path = world.findPath(0, 5)
+    const path = world.findPathDikstra(0, 5)
     
     drawRoads(ctx, world)
     drawPath(ctx, path)

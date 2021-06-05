@@ -108,6 +108,14 @@ class Path {
         copy.dist = this.dist
         return copy
     }
+
+    merge(path) {
+        const merged = this.copy()
+        merged.dist += path.dist
+        merged.nodes.pop()
+        merged.nodes.push(...path.copy().nodes.reverse());
+        return merged
+    }
 }
 
 function chooseBetterPath(path1, path2) {
@@ -293,6 +301,7 @@ class World {
             for (let [key, from] of Object.entries(paths)) {
                 const newPaths = []
                 for (let p of from) {
+                    p.end.sortNeighbours()
                     const nextCities = p.end.neighbours.filter(
                         n => !p.nodes.includes(n))
                     nextCities.forEach(
@@ -300,10 +309,88 @@ class World {
                 }
                 // from = newPaths
                 paths[key] = newPaths
+                path = this.mergePaths(paths)
+                if (path !== -1) break
             }
-            path = this.mergePaths(paths)
         }
         return path
+    }
+
+    findPathDikstra(city1Id, city2Id) {
+        const processed1 = []
+        const processed2 = []
+        const unprocessed1 = [...this.cities]
+        const unprocessed2 = [...this.cities]
+
+        const path1To = {}
+        const path2To = {}
+        this.cities.forEach(c => {
+            path1To[c.id] = -1
+            path2To[c.id] = -1
+        })
+        path1To[city1Id] = new Path(this.cities[city1Id])
+        path2To[city2Id] = new Path(this.cities[city2Id])
+
+        const popNearesetUnprocessed = (unprocessed, pathTo) => {
+            let nearest = unprocessed[0]
+            for (let city of unprocessed.slice(1)) {
+                if (pathTo[city.id] === -1) continue
+                if (pathTo[nearest.id] === -1) nearest = city
+                else if (pathTo[city.id].dist < pathTo[nearest.id].dist) {
+                    nearest = city
+                }
+            }
+            const id = unprocessed.indexOf(nearest)
+            unprocessed.splice(id, 1)
+            return nearest;
+        }
+
+        const updateDist = (pathTo, city, neighbour, startCityId) => {
+            if (neighbour.id === startCityId) {return}
+            assert(pathTo[city.id].nodes[0].id === startCityId)
+            assert(pathTo[city.id].end.id == city.id)
+            const newPath = pathTo[city.id].copy().extend(neighbour)
+            if (pathTo[neighbour.id] === -1) pathTo[neighbour.id] = newPath
+            else pathTo[neighbour.id] = chooseBetterPath(newPath, pathTo[neighbour.id])
+            assert(pathTo[neighbour.id].nodes[0].id === startCityId)
+            assert(pathTo[neighbour.id] !== -1)
+            assert(pathTo[neighbour.id].end.id === neighbour.id)
+        }
+
+        let bestPath = -1
+        while(unprocessed1.length !== 0 || unprocessed2.length !== 0) {
+            const nearest1 = popNearesetUnprocessed(unprocessed1, path1To)
+            const nearest2 = popNearesetUnprocessed(unprocessed2, path2To)
+            assert(nearest1 !== undefined)
+            assert(nearest2 !== undefined)
+            processed1.push(nearest1)
+            processed2.push(nearest2)
+
+            if (bestPath !== -1 && bestPath.dist <= path1To[nearest1.id].dist + path2To[nearest2.id].dist) {
+                break
+            }
+
+            for (let n of nearest1.neighbours) {
+                updateDist(path1To, nearest1, n, city1Id)
+                if (processed2.includes(n)) {
+                    const p1 = path1To[n.id]
+                    const p2 = path2To[n.id]
+                    if (path1To[n.id].dist + path2To[n.id].dist < bestPath.dist
+                        || bestPath === -1) bestPath = p1.merge(p2)
+                    }
+                }
+            for (let n of nearest2.neighbours) {
+                updateDist(path2To, nearest2, n, city2Id)
+                if (processed1.includes(n)) {
+                    const p1 = path1To[n.id]
+                    const p2 = path2To[n.id]
+                    if (path1To[n.id].dist + path2To[n.id].dist < bestPath.dist
+                        || bestPath === -1) bestPath = p1.merge(p2)
+                }
+            }
+        }
+
+        return bestPath
     }
 }
 
@@ -328,7 +415,7 @@ function testSalesman() {
 
 function testBidirectSearch() {
     const HOW_MANY_CITIES = 300
-    const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
+    const FRACTION_OF_ROADS = 0.2 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
@@ -340,12 +427,13 @@ function testBidirectSearch() {
         const city2Id = Math.floor(HOW_MANY_CITIES*Math.random())
         console.log()
         t = Date.now()
-        let path = world.findPath(city1Id, city2Id)
+        let path = world.findPathDikstra(city1Id, city2Id)
         console.log(`Path between ${city1Id} and ${city2Id} found in ${(Date.now()-t)/1000}s`)
         console.log(`Distance: ${path.dist}; Nodes: ${path.nodes.length}`)
         paths.push(path)
     }
+    console.log("")
 }
 
 // testSalesman()
-// testBidirectSearch()
+testBidirectSearch()
