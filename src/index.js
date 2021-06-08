@@ -1,19 +1,17 @@
 'use strict';
 
-const CANVAS_SIZE = 500 // dont touch this
 const CITY_RAD = 5
-const HOW_MANY_CITIES = 10
-const FRACTION_OF_ROADS = 1 // 0.8 = 80% of all roads
-const SOLVER_MODE = "salesman" // bidirect, salesman
-const SOLVER_METHOD = "dfs" // bfs, dfs, mst, greedy
-// ^ matters only if SOLVER_MODE is "salesman"
+
+
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext('2d')
 
 function translateCoor(coor) {
     const off = 100 + CITY_RAD
-    return (coor+off)*(CANVAS_SIZE/(off*2))
+    return (coor+off)*(canvas.width/(off*2))
 }
 
-function drawCities(ctx, world) {
+function drawCities(world) {
     ctx.fillStyle = "#000"
     for (let city of world.cities) {
         const circle = new Path2D()
@@ -24,7 +22,7 @@ function drawCities(ctx, world) {
     }
 }
 
-function drawRoads(ctx, world) {
+function drawRoads(world) {
     ctx.strokeStyle = "#bbb"
     for (let pair of world.roads) {
         const [city1, city2] = pair
@@ -41,7 +39,7 @@ function drawRoads(ctx, world) {
     }
 }
 
-function drawPath(ctx, path) {
+function drawPath(path) {
     ctx.strokeStyle = "#0056F5"
     ctx.beginPath()
     ctx.moveTo(
@@ -57,57 +55,49 @@ function drawPath(ctx, path) {
     ctx.stroke()
 }
 
-function printInfo(path, world) {
-    document.getElementById('no-cities').innerText = world.cities.length
-    document.getElementById('no-roads').innerText = world.roads.length
-    document.getElementById('%-roads').innerText = `${FRACTION_OF_ROADS*100}%`
-    if (SOLVER_MODE === "bidirect")
-        document.getElementById('method').innerText = "bidirect dikstra"
-    else document.getElementById('method').innerText = SOLVER_METHOD
-    document.getElementById('len').innerText = Math.ceil(path.dist)
-    document.getElementById('nodes').innerText = path.nodes.length
+function clearCanvas() {
+    ctx.fillStyle = "#fff"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function run() {
-    const canvas = document.getElementById("canvas")
-    const ctx = canvas.getContext('2d')
-    const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
+function ModeSelector({mode, setMode}) {
+    const change = () => {
+        if (mode === "bidirect") setMode("salesman")
+        else setMode("bidirect")
+    }
 
-    const path = SOLVER_MODE === "bidirect"
+    return (
+        <form>
+            <input type="radio" name="mode" id="bidirect" value="bidirect"
+                onChange={change} checked={mode === "bidirect"}/>
+            <label htmlFor="bidirect">Bidirectional pathfinding</label>
+            <input type="radio" name="mode" id="salesman" value="salesman"
+                onChange={change} checked={mode === "salesman"}/>
+            <label htmlFor="salesman">Salesman problem</label>
+        </form>
+    )
+}
+
+function App() {
+    const [cityNo, setCityNo] = React.useState(10)
+    const [roadFr, setRoadFr] = React.useState(1) // 0.8 = 80% of all roads
+    const [mode, setMode] = React.useState("salesman") // bidirect, salesman
+    const [solver, setSolver] = React.useState("mst") // bfs, dfs, mst, greedy
+
+    const [world, setWorld] = React.useState(new World(cityNo, roadFr))
+    const path = mode === "bidirect"
         ? world.findPathDikstra(0, 5)
-        : world.salesmanSolver(SOLVER_METHOD)
+        : world.salesmanSolver(solver)
 
-    drawRoads(ctx, world)
-    drawPath(ctx, path)
-    drawCities(ctx, world)
-    printInfo(path, world)
+    clearCanvas()
+    drawRoads(world)
+    drawPath(path)
+    drawCities(world)
+    return (<div>
+        <ModeSelector mode={mode} setMode={setMode}/>
+        <p>Current mode: {mode}</p>
+    </div>)
 }
 
-// class LikeButton extends React.Component {
-//     constructor(props) {
-//       super(props);
-//       this.state = { liked: false };
-//     }
-  
-//     render() {
-//       if (this.state.liked) {
-//         return 'You liked this.';
-//       }
-  
-//       return e(
-//         'button',
-//         { onClick: () => this.setState({ liked: true }) },
-//         'Like'
-//       );
-//     }
-//   }
-
-function LikeButton() {
-    const [isLiked, setIsLiked] = React.useState(false)
-    if (isLiked) return 'You like me :)'
-    return (<button onClick={()=>setIsLiked(true)}>Like me!</button>)
-}
-
-  const e = React.createElement;
-  const domContainer = document.querySelector('#like_button_container');
-  ReactDOM.render(e(LikeButton), domContainer);
+  const root = document.querySelector('#root');
+  ReactDOM.render(<App/>, root);
