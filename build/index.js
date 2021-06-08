@@ -144,7 +144,7 @@ function ModeSelector(_ref) {
     );
 }
 
-function CitySelector(_ref2) {
+function CityNoSelector(_ref2) {
     var cityNo = _ref2.cityNo,
         setCityNo = _ref2.setCityNo;
 
@@ -160,7 +160,7 @@ function CitySelector(_ref2) {
             'label',
             null,
             'Enter no of cities:',
-            React.createElement('input', { type: 'number', min: '2', max: '100',
+            React.createElement('input', { type: 'number', min: '2', max: '300',
                 defaultValue: cityNo, ref: inputEl })
         ),
         React.createElement(
@@ -207,27 +207,49 @@ function SolverSelector(_ref4) {
         'select',
         { onChange: function onChange(e) {
                 return setSolver(e.target.value);
-            } },
+            }, value: solver },
         React.createElement(
             'option',
-            { value: 'bfs', selected: "bfs" === solver },
+            { value: 'bfs' },
             'breadth-first search'
         ),
         React.createElement(
             'option',
-            { value: 'dfs', selected: "dfs" === solver },
+            { value: 'dfs' },
             'depth-first search'
         ),
         React.createElement(
             'option',
-            { value: 'greedy', selected: "greedy" === solver },
+            { value: 'greedy' },
             'greedy search'
         ),
         React.createElement(
             'option',
-            { value: 'mst', selected: "mst" === solver },
+            { value: 'mst' },
             'minimum spanning tree'
         )
+    );
+}
+
+function CitySelector(_ref5) {
+    var cityNo = _ref5.cityNo,
+        setCityNo = _ref5.setCityNo,
+        maxNo = _ref5.maxNo,
+        prompt = _ref5.prompt;
+
+    var handleChange = function handleChange(e) {
+        var val = parseInt(e.target.value);
+        if (val > maxNo) val = maxNo;
+        setCityNo(val);
+    };
+    return React.createElement(
+        'label',
+        null,
+        'Enter ',
+        prompt,
+        ' city id:',
+        React.createElement('input', { type: 'number', min: '0', max: maxNo,
+            value: cityNo, onChange: handleChange })
     );
 }
 
@@ -240,19 +262,17 @@ function App() {
     var _React$useState3 = React.useState(1),
         _React$useState4 = _slicedToArray(_React$useState3, 2),
         roadFr = _React$useState4[0],
-        setRoadFr = _React$useState4[1]; // 0.8 = 80% of all roads
-
+        setRoadFr = _React$useState4[1];
 
     var _React$useState5 = React.useState("salesman"),
         _React$useState6 = _slicedToArray(_React$useState5, 2),
         mode = _React$useState6[0],
-        setMode = _React$useState6[1]; // bidirect, salesman
-
+        setMode = _React$useState6[1];
 
     var _React$useState7 = React.useState("mst"),
         _React$useState8 = _slicedToArray(_React$useState7, 2),
         solver = _React$useState8[0],
-        setSolver = _React$useState8[1]; // bfs, dfs, mst, greedy
+        setSolver = _React$useState8[1];
 
     var _React$useState9 = React.useState(new World(cityNo, roadFr)),
         _React$useState10 = _slicedToArray(_React$useState9, 2),
@@ -271,7 +291,7 @@ function App() {
     var _React$useState13 = React.useState(1),
         _React$useState14 = _slicedToArray(_React$useState13, 2),
         endCityId = _React$useState14[0],
-        setEndId = _React$useState14[1];
+        setEndCityId = _React$useState14[1];
 
     var path = mode === "bidirect" ? world.findPathDikstra(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
 
@@ -280,13 +300,21 @@ function App() {
     drawPath(path);
     drawCities(world);
 
+    if (cityNo > 10 && mode === "salesman" && ["dfs", "bfs"].includes(solver)) {
+        alert('Setting no of cities to ' + cityNo + ' with the ' + solver + '         solver will resoult in the app freezing. Setting no of         cities back to 10.');
+        setCityNo(10);
+    }
+
     return React.createElement(
         'div',
         null,
-        React.createElement(CitySelector, { cityNo: cityNo, setCityNo: setCityNo }),
+        React.createElement(CityNoSelector, { cityNo: cityNo, setCityNo: setCityNo }),
         React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),
         React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
-        mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : ""
+        React.createElement(CitySelector, { cityNo: startCityId, setCityNo: setStartCityId,
+            maxNo: cityNo - 1, prompt: 'start' }),
+        mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : React.createElement(CitySelector, { cityNo: endCityId, setCityNo: setEndCityId,
+            maxNo: cityNo - 1, prompt: 'end' })
     );
 }
 

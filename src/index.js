@@ -84,7 +84,7 @@ function CityNoSelector({cityNo, setCityNo}) {
     }
     return (<form onSubmit={handleChange}>
         <label>Enter no of cities:
-        <input type="number" min="2" max="100"
+        <input type="number" min="2" max="300"
             defaultValue={cityNo} ref={inputEl}/>
         </label>
         <button type="sumbit">Save</button>
@@ -108,19 +108,34 @@ function RoadSelector({roadFr, setRoadFr}) {
 }
 
 function SolverSelector({solver, setSolver}) {
-    return (<select onChange={(e)=>setSolver(e.target.value)}>
-        <option value="bfs" selected={"bfs" === solver}>breadth-first search</option>
-        <option value="dfs" selected={"dfs" === solver}>depth-first search</option>
-        <option value="greedy" selected={"greedy" === solver}>greedy search</option>
-        <option value="mst" selected={"mst" === solver}>minimum spanning tree</option>
+    return (<select onChange={(e)=>setSolver(e.target.value)} value={solver}>
+        <option value="bfs">breadth-first search</option>
+        <option value="dfs">depth-first search</option>
+        <option value="greedy">greedy search</option>
+        <option value="mst">minimum spanning tree</option>
     </select>)
+}
+
+function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
+    const handleChange = (e) => {
+        let val = parseInt(e.target.value)
+        if (val > maxNo) val = maxNo
+        setCityNo(val)
+    }
+    return (
+        <label>
+        Enter {prompt} city id:
+        <input type="number" min="0" max={maxNo}
+            value={cityNo} onChange={handleChange}/>
+        </label>
+    )
 }
 
 function App() {
     const [cityNo, setCityNo] = React.useState(10)
-    const [roadFr, setRoadFr] = React.useState(1) // 0.8 = 80% of all roads
-    const [mode, setMode] = React.useState("salesman") // bidirect, salesman
-    const [solver, setSolver] = React.useState("mst") // bfs, dfs, mst, greedy
+    const [roadFr, setRoadFr] = React.useState(1)
+    const [mode, setMode] = React.useState("salesman")
+    const [solver, setSolver] = React.useState("mst")
     
     const [world, setWorld] = React.useState(new World(cityNo, roadFr))
     React.useEffect(() => {
@@ -128,7 +143,7 @@ function App() {
     }, [cityNo, roadFr])
 
     const [startCityId, setStartCityId] = React.useState(0)
-    const [endCityId, setEndId] = React.useState(1)
+    const [endCityId, setEndCityId] = React.useState(1)
     const path = mode === "bidirect"
         ? world.findPathDikstra(startCityId, endCityId)
         : world.salesmanSolver(solver, startCityId)
@@ -138,13 +153,23 @@ function App() {
     drawPath(path)
     drawCities(world)
 
+    if (cityNo > 10 && mode === "salesman" && ["dfs", "bfs"].includes(solver)) {
+        alert(`Setting no of cities to ${cityNo} with the ${solver} \
+        solver will resoult in the app freezing. Setting no of \
+        cities back to 10.`)
+        setCityNo(10)
+    }
+
     return (<div>
         <CityNoSelector cityNo={cityNo} setCityNo={setCityNo}/>
         <RoadSelector roadFr={roadFr} setRoadFr={setRoadFr}/>
         <ModeSelector mode={mode} setMode={setMode}/>
+        <CitySelector cityNo={startCityId} setCityNo={setStartCityId}
+            maxNo={cityNo-1} prompt="start" />
         {mode === "salesman"
             ? <SolverSelector solver={solver} setSolver={setSolver}/>
-            : ""
+            : <CitySelector cityNo={endCityId} setCityNo={setEndCityId}
+            maxNo={cityNo-1} prompt="end" />
         }
         
     </div>)
