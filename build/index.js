@@ -199,6 +199,38 @@ function RoadSelector(_ref3) {
     );
 }
 
+function SolverSelector(_ref4) {
+    var solver = _ref4.solver,
+        setSolver = _ref4.setSolver;
+
+    return React.createElement(
+        'select',
+        { onChange: function onChange(e) {
+                return setSolver(e.target.value);
+            } },
+        React.createElement(
+            'option',
+            { value: 'bfs', selected: "bfs" === solver },
+            'breadth-first search'
+        ),
+        React.createElement(
+            'option',
+            { value: 'dfs', selected: "dfs" === solver },
+            'depth-first search'
+        ),
+        React.createElement(
+            'option',
+            { value: 'greedy', selected: "greedy" === solver },
+            'greedy search'
+        ),
+        React.createElement(
+            'option',
+            { value: 'mst', selected: "mst" === solver },
+            'minimum spanning tree'
+        )
+    );
+}
+
 function App() {
     var _React$useState = React.useState(10),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -231,7 +263,17 @@ function App() {
         setWorld(new World(cityNo, roadFr));
     }, [cityNo, roadFr]);
 
-    var path = mode === "bidirect" ? world.findPathDikstra(0, 5) : world.salesmanSolver(solver);
+    var _React$useState11 = React.useState(0),
+        _React$useState12 = _slicedToArray(_React$useState11, 2),
+        startCityId = _React$useState12[0],
+        setStartCityId = _React$useState12[1];
+
+    var _React$useState13 = React.useState(1),
+        _React$useState14 = _slicedToArray(_React$useState13, 2),
+        endCityId = _React$useState14[0],
+        setEndId = _React$useState14[1];
+
+    var path = mode === "bidirect" ? world.findPathDikstra(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
 
     clearCanvas();
     drawRoads(world);
@@ -244,18 +286,7 @@ function App() {
         React.createElement(CitySelector, { cityNo: cityNo, setCityNo: setCityNo }),
         React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),
         React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
-        React.createElement(
-            'p',
-            null,
-            'Current mode: ',
-            mode
-        ),
-        React.createElement(
-            'p',
-            null,
-            'Current city no: ',
-            cityNo
-        )
+        mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : ""
     );
 }
 

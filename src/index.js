@@ -76,7 +76,7 @@ function ModeSelector({mode, setMode}) {
     )
 }
 
-function CitySelector({cityNo, setCityNo}) {
+function CityNoSelector({cityNo, setCityNo}) {
     const inputEl = React.useRef()
     const handleChange = (e) => {
         setCityNo(parseInt(inputEl.current.value))
@@ -107,6 +107,15 @@ function RoadSelector({roadFr, setRoadFr}) {
     </form>)
 }
 
+function SolverSelector({solver, setSolver}) {
+    return (<select onChange={(e)=>setSolver(e.target.value)}>
+        <option value="bfs" selected={"bfs" === solver}>breadth-first search</option>
+        <option value="dfs" selected={"dfs" === solver}>depth-first search</option>
+        <option value="greedy" selected={"greedy" === solver}>greedy search</option>
+        <option value="mst" selected={"mst" === solver}>minimum spanning tree</option>
+    </select>)
+}
+
 function App() {
     const [cityNo, setCityNo] = React.useState(10)
     const [roadFr, setRoadFr] = React.useState(1) // 0.8 = 80% of all roads
@@ -118,9 +127,11 @@ function App() {
         setWorld(new World(cityNo, roadFr))
     }, [cityNo, roadFr])
 
+    const [startCityId, setStartCityId] = React.useState(0)
+    const [endCityId, setEndId] = React.useState(1)
     const path = mode === "bidirect"
-        ? world.findPathDikstra(0, 5)
-        : world.salesmanSolver(solver)
+        ? world.findPathDikstra(startCityId, endCityId)
+        : world.salesmanSolver(solver, startCityId)
     
     clearCanvas()
     drawRoads(world)
@@ -128,11 +139,14 @@ function App() {
     drawCities(world)
 
     return (<div>
-        <CitySelector cityNo={cityNo} setCityNo={setCityNo}/>
+        <CityNoSelector cityNo={cityNo} setCityNo={setCityNo}/>
         <RoadSelector roadFr={roadFr} setRoadFr={setRoadFr}/>
         <ModeSelector mode={mode} setMode={setMode}/>
-        <p>Current mode: {mode}</p>
-        <p>Current city no: {cityNo}</p>
+        {mode === "salesman"
+            ? <SolverSelector solver={solver} setSolver={setSolver}/>
+            : ""
+        }
+        
     </div>)
 }
 
