@@ -1,8 +1,6 @@
 'use strict';
 
 const CITY_RAD = 5
-
-
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext('2d')
 
@@ -78,26 +76,65 @@ function ModeSelector({mode, setMode}) {
     )
 }
 
+function CitySelector({cityNo, setCityNo}) {
+    const inputEl = React.useRef()
+    const handleChange = (e) => {
+        setCityNo(parseInt(inputEl.current.value))
+        e.preventDefault()
+    }
+    return (<form onSubmit={handleChange}>
+        <label>Enter no of cities:
+        <input type="number" min="2" max="100"
+            defaultValue={cityNo} ref={inputEl}/>
+        </label>
+        <button type="sumbit">Save</button>
+    </form>)
+}
+
+function RoadSelector({roadFr, setRoadFr}) {
+    const inputEl = React.useRef()
+    const handleChange = (e) => {
+        const val = parseFloat(inputEl.current.value)
+        setRoadFr(val)
+        e.preventDefault()
+    }
+    return (<form onSubmit={handleChange}>
+        <label>Enter fraction of roads:
+        <input type="number" min="0.5" max="1" step="0.01"
+            defaultValue={roadFr} ref={inputEl}/>
+        </label>
+        <button type="sumbit">Save</button>
+    </form>)
+}
+
 function App() {
     const [cityNo, setCityNo] = React.useState(10)
     const [roadFr, setRoadFr] = React.useState(1) // 0.8 = 80% of all roads
     const [mode, setMode] = React.useState("salesman") // bidirect, salesman
     const [solver, setSolver] = React.useState("mst") // bfs, dfs, mst, greedy
-
+    
     const [world, setWorld] = React.useState(new World(cityNo, roadFr))
+    React.useEffect(() => {
+        setWorld(new World(cityNo, roadFr))
+    }, [cityNo, roadFr])
+
     const path = mode === "bidirect"
         ? world.findPathDikstra(0, 5)
         : world.salesmanSolver(solver)
-
+    
     clearCanvas()
     drawRoads(world)
     drawPath(path)
     drawCities(world)
+
     return (<div>
+        <CitySelector cityNo={cityNo} setCityNo={setCityNo}/>
+        <RoadSelector roadFr={roadFr} setRoadFr={setRoadFr}/>
         <ModeSelector mode={mode} setMode={setMode}/>
         <p>Current mode: {mode}</p>
+        <p>Current city no: {cityNo}</p>
     </div>)
 }
 
   const root = document.querySelector('#root');
-  ReactDOM.render(<App/>, root);
+  ReactDOM.render(<App/>, root)

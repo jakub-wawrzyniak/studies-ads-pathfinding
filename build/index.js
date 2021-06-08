@@ -3,7 +3,6 @@
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var CITY_RAD = 5;
-
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
@@ -145,6 +144,61 @@ function ModeSelector(_ref) {
     );
 }
 
+function CitySelector(_ref2) {
+    var cityNo = _ref2.cityNo,
+        setCityNo = _ref2.setCityNo;
+
+    var inputEl = React.useRef();
+    var handleChange = function handleChange(e) {
+        setCityNo(parseInt(inputEl.current.value));
+        e.preventDefault();
+    };
+    return React.createElement(
+        'form',
+        { onSubmit: handleChange },
+        React.createElement(
+            'label',
+            null,
+            'Enter no of cities:',
+            React.createElement('input', { type: 'number', min: '2', max: '100',
+                defaultValue: cityNo, ref: inputEl })
+        ),
+        React.createElement(
+            'button',
+            { type: 'sumbit' },
+            'Save'
+        )
+    );
+}
+
+function RoadSelector(_ref3) {
+    var roadFr = _ref3.roadFr,
+        setRoadFr = _ref3.setRoadFr;
+
+    var inputEl = React.useRef();
+    var handleChange = function handleChange(e) {
+        var val = parseFloat(inputEl.current.value);
+        setRoadFr(val);
+        e.preventDefault();
+    };
+    return React.createElement(
+        'form',
+        { onSubmit: handleChange },
+        React.createElement(
+            'label',
+            null,
+            'Enter fraction of roads:',
+            React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
+                defaultValue: roadFr, ref: inputEl })
+        ),
+        React.createElement(
+            'button',
+            { type: 'sumbit' },
+            'Save'
+        )
+    );
+}
+
 function App() {
     var _React$useState = React.useState(10),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -173,21 +227,34 @@ function App() {
         world = _React$useState10[0],
         setWorld = _React$useState10[1];
 
+    React.useEffect(function () {
+        setWorld(new World(cityNo, roadFr));
+    }, [cityNo, roadFr]);
+
     var path = mode === "bidirect" ? world.findPathDikstra(0, 5) : world.salesmanSolver(solver);
 
     clearCanvas();
     drawRoads(world);
     drawPath(path);
     drawCities(world);
+
     return React.createElement(
         'div',
         null,
+        React.createElement(CitySelector, { cityNo: cityNo, setCityNo: setCityNo }),
+        React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),
         React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
         React.createElement(
             'p',
             null,
             'Current mode: ',
             mode
+        ),
+        React.createElement(
+            'p',
+            null,
+            'Current city no: ',
+            cityNo
         )
     );
 }
