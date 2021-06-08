@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="./pathFinding.js"></script>
-    <script src="./index.js"></script>
 </head>
 
 <body onload="run();">
@@ -44,7 +42,14 @@
                 </tr>
             </table>
             <p style="max-width:500px;">To modify behaviour of this app, visit index.js and change constants at the beginning of the file.</p>
+            <div id="like_button_container"></div>
         </div>
     </main>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+
+    <script src="./pathFinding.js"></script>
+    <script src="./index.js"></script>
 </body>
 </html>
