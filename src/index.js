@@ -58,6 +58,13 @@ function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
+function PlusMinus({state, setState, step}) {
+    return (<span>
+        <button onClick={()=>setState(state+step)}>+</button>
+        <button onClick={()=>setState(state-step)}>-</button>
+    </span>)
+}
+
 function ModeSelector({mode, setMode}) {
     const change = () => {
         if (mode === "bidirect") setMode("salesman")
@@ -77,33 +84,31 @@ function ModeSelector({mode, setMode}) {
 }
 
 function CityNoSelector({cityNo, setCityNo}) {
-    const handleChange = (e) => {
-        let val = parseInt(e.target.value)
+    const handleChange = (val) => {
+        val = parseInt(val)
         if (val < 2 || !val) val = 2
         else if (val > 300) val = 300
         setCityNo(val)
     }
-    return (<form>
-        <label>Enter no of cities:
+    return (<label>Enter no of cities:
         <input type="number" min="2" max="300"
-            value={cityNo} onChange={handleChange}/>
-        </label>
-    </form>)
+            value={cityNo} onChange={e=>handleChange(e.target.value)}/>
+        <PlusMinus state={cityNo} setState={handleChange} step={1}/>
+        </label>)
 }
 
 function RoadSelector({roadFr, setRoadFr}) {
-    const handleChange = (e) => {
-        let val = parseFloat(e.target.value)
+    const handleChange = (val) => {
+        val = parseFloat(val)
         if (val < 0.5 || !val) val = 0.5
         else if (val > 1) val = 1
         setRoadFr(val)
     }
-    return (<form >
-        <label>Enter fraction of roads:
+    return (<label>Enter fraction of roads:
         <input type="number" min="0.5" max="1" step="0.01"
-            value={roadFr} onChange={handleChange}/>
-        </label>
-    </form>)
+            value={roadFr} onChange={e=>handleChange(e.target.value)}/>
+        <PlusMinus state={roadFr} setState={handleChange} step={0.01}/>
+        </label>)
 }
 
 function SolverSelector({solver, setSolver}) {
@@ -116,8 +121,8 @@ function SolverSelector({solver, setSolver}) {
 }
 
 function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
-    const handleChange = (e) => {
-        let val = parseInt(e.target.value)
+    const handleChange = (val) => {
+        val = parseInt(val)
         if (val > maxNo) val = maxNo
         if (val < 0 || !val) val = 0
         setCityNo(val)
@@ -126,9 +131,24 @@ function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
         <label>
         Enter {prompt} city id:
         <input type="number" min="0" max={maxNo}
-            value={cityNo} onChange={handleChange}/>
+            value={cityNo} onChange={e=>handleChange(e.target.value)}/>
+        <PlusMinus setState={handleChange} state={cityNo} step={1} />
         </label>
     )
+}
+
+function ShowPathInfo({path}) {
+    if (path === -1) return (<ul>
+        <h4>No path has been found</h4>
+        <p>Try selecting different endpoints
+        or increasing the fraction of roads</p>
+    </ul>)
+
+    return (<ul>
+        <h4>Path details:</h4>
+        <li>path length: {Math.ceil(path.dist)}</li>
+        <li>nodes in path: {path.nodes.length}</li>
+    </ul>)
 }
 
 function App() {
@@ -142,23 +162,22 @@ function App() {
         setWorld(new World(cityNo, roadFr))
     }, [cityNo, roadFr])
 
-    if (cityNo > 10 && mode === "salesman" && ["dfs", "bfs"].includes(solver)) {
-        alert(`Setting no of cities to ${cityNo} with the ${solver} \
-        solver will resoult in the app freezing. Setting no of \
-        cities back to 10.`)
+    const shouldCalcPath = cityNo <= 10 || mode === "bidirect" || !["dfs", "bfs"].includes(solver)
+    if (!shouldCalcPath) {
+        alert(`Setting no of cities to ${cityNo} with the ${solver} solver will resoult in the app freezing. Setting no of cities back to 10.`)
         setCityNo(10)
     }
 
     const [startCityId, setStartCityId] = React.useState(0)
     const [endCityId, setEndCityId] = React.useState(1)
-    const path = mode === "bidirect"
+    let path = -1
+    if (shouldCalcPath) path = mode === "bidirect"
         ? world.findPathDikstra(startCityId, endCityId)
         : world.salesmanSolver(solver, startCityId)
-    const wasPathFound = path !== -1
     
     clearCanvas()
     drawRoads(world)
-    if (wasPathFound) drawPath(path)
+    if (path !== -1) drawPath(path)
     drawCities(world)
 
     return (<div>
@@ -172,12 +191,7 @@ function App() {
             : <CitySelector cityNo={endCityId} setCityNo={setEndCityId}
             maxNo={cityNo-1} prompt="end" />
         }
-        {wasPathFound === false
-            ? <div>
-                <h3>No path has been found</h3>
-                <p>Try selecting different endpoints or increasing the fraction of roads</p>
-            </div>
-            : ""}
+        <ShowPathInfo path={path}/>
     </div>)
 }
 

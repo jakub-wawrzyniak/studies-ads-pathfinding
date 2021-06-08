@@ -116,9 +116,34 @@ function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function ModeSelector(_ref) {
-    var mode = _ref.mode,
-        setMode = _ref.setMode;
+function PlusMinus(_ref) {
+    var state = _ref.state,
+        setState = _ref.setState,
+        step = _ref.step;
+
+    return React.createElement(
+        'span',
+        null,
+        React.createElement(
+            'button',
+            { onClick: function onClick() {
+                    return setState(state + step);
+                } },
+            '+'
+        ),
+        React.createElement(
+            'button',
+            { onClick: function onClick() {
+                    return setState(state - step);
+                } },
+            '-'
+        )
+    );
+}
+
+function ModeSelector(_ref2) {
+    var mode = _ref2.mode,
+        setMode = _ref2.setMode;
 
     var change = function change() {
         if (mode === "bidirect") setMode("salesman");else setMode("bidirect");
@@ -144,53 +169,51 @@ function ModeSelector(_ref) {
     );
 }
 
-function CityNoSelector(_ref2) {
-    var cityNo = _ref2.cityNo,
-        setCityNo = _ref2.setCityNo;
+function CityNoSelector(_ref3) {
+    var cityNo = _ref3.cityNo,
+        setCityNo = _ref3.setCityNo;
 
-    var handleChange = function handleChange(e) {
-        var val = parseInt(e.target.value);
+    var handleChange = function handleChange(val) {
+        val = parseInt(val);
         if (val < 2 || !val) val = 2;else if (val > 300) val = 300;
         setCityNo(val);
     };
     return React.createElement(
-        'form',
+        'label',
         null,
-        React.createElement(
-            'label',
-            null,
-            'Enter no of cities:',
-            React.createElement('input', { type: 'number', min: '2', max: '300',
-                value: cityNo, onChange: handleChange })
-        )
+        'Enter no of cities:',
+        React.createElement('input', { type: 'number', min: '2', max: '300',
+            value: cityNo, onChange: function onChange(e) {
+                return handleChange(e.target.value);
+            } }),
+        React.createElement(PlusMinus, { state: cityNo, setState: handleChange, step: 1 })
     );
 }
 
-function RoadSelector(_ref3) {
-    var roadFr = _ref3.roadFr,
-        setRoadFr = _ref3.setRoadFr;
+function RoadSelector(_ref4) {
+    var roadFr = _ref4.roadFr,
+        setRoadFr = _ref4.setRoadFr;
 
-    var handleChange = function handleChange(e) {
-        var val = parseFloat(e.target.value);
+    var handleChange = function handleChange(val) {
+        val = parseFloat(val);
         if (val < 0.5 || !val) val = 0.5;else if (val > 1) val = 1;
         setRoadFr(val);
     };
     return React.createElement(
-        'form',
+        'label',
         null,
-        React.createElement(
-            'label',
-            null,
-            'Enter fraction of roads:',
-            React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
-                value: roadFr, onChange: handleChange })
-        )
+        'Enter fraction of roads:',
+        React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
+            value: roadFr, onChange: function onChange(e) {
+                return handleChange(e.target.value);
+            } }),
+        React.createElement(PlusMinus, { state: roadFr, setState: handleChange, step: 0.01 })
     );
 }
 
-function SolverSelector(_ref4) {
-    var solver = _ref4.solver,
-        setSolver = _ref4.setSolver;
+function SolverSelector(_ref5) {
+    var solver = _ref5.solver,
+        setSolver = _ref5.setSolver;
 
     return React.createElement(
         'select',
@@ -220,14 +243,14 @@ function SolverSelector(_ref4) {
     );
 }
 
-function CitySelector(_ref5) {
-    var cityNo = _ref5.cityNo,
-        setCityNo = _ref5.setCityNo,
-        maxNo = _ref5.maxNo,
-        prompt = _ref5.prompt;
+function CitySelector(_ref6) {
+    var cityNo = _ref6.cityNo,
+        setCityNo = _ref6.setCityNo,
+        maxNo = _ref6.maxNo,
+        prompt = _ref6.prompt;
 
-    var handleChange = function handleChange(e) {
-        var val = parseInt(e.target.value);
+    var handleChange = function handleChange(val) {
+        val = parseInt(val);
         if (val > maxNo) val = maxNo;
         if (val < 0 || !val) val = 0;
         setCityNo(val);
@@ -239,7 +262,51 @@ function CitySelector(_ref5) {
         prompt,
         ' city id:',
         React.createElement('input', { type: 'number', min: '0', max: maxNo,
-            value: cityNo, onChange: handleChange })
+            value: cityNo, onChange: function onChange(e) {
+                return handleChange(e.target.value);
+            } }),
+        React.createElement(PlusMinus, { setState: handleChange, state: cityNo, step: 1 })
+    );
+}
+
+function ShowPathInfo(_ref7) {
+    var path = _ref7.path;
+
+    if (path === -1) return React.createElement(
+        'ul',
+        null,
+        React.createElement(
+            'h4',
+            null,
+            'No path has been found'
+        ),
+        React.createElement(
+            'p',
+            null,
+            'Try selecting different endpoints or increasing the fraction of roads'
+        )
+    );
+
+    return React.createElement(
+        'ul',
+        null,
+        React.createElement(
+            'h4',
+            null,
+            'Path details:'
+        ),
+        React.createElement(
+            'li',
+            null,
+            'path length: ',
+            Math.ceil(path.dist)
+        ),
+        React.createElement(
+            'li',
+            null,
+            'nodes in path: ',
+            path.nodes.length
+        )
     );
 }
 
@@ -273,8 +340,9 @@ function App() {
         setWorld(new World(cityNo, roadFr));
     }, [cityNo, roadFr]);
 
-    if (cityNo > 10 && mode === "salesman" && ["dfs", "bfs"].includes(solver)) {
-        alert('Setting no of cities to ' + cityNo + ' with the ' + solver + '         solver will resoult in the app freezing. Setting no of         cities back to 10.');
+    var shouldCalcPath = cityNo <= 10 || mode === "bidirect" || !["dfs", "bfs"].includes(solver);
+    if (!shouldCalcPath) {
+        alert('Setting no of cities to ' + cityNo + ' with the ' + solver + ' solver will resoult in the app freezing. Setting no of cities back to 10.');
         setCityNo(10);
     }
 
@@ -288,12 +356,12 @@ function App() {
         endCityId = _React$useState14[0],
         setEndCityId = _React$useState14[1];
 
-    var path = mode === "bidirect" ? world.findPathDikstra(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
-    var wasPathFound = path !== -1;
+    var path = -1;
+    if (shouldCalcPath) path = mode === "bidirect" ? world.findPathDikstra(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
 
     clearCanvas();
     drawRoads(world);
-    if (wasPathFound) drawPath(path);
+    if (path !== -1) drawPath(path);
     drawCities(world);
 
     return React.createElement(
@@ -306,20 +374,7 @@ function App() {
             maxNo: cityNo - 1, prompt: 'start' }),
         mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : React.createElement(CitySelector, { cityNo: endCityId, setCityNo: setEndCityId,
             maxNo: cityNo - 1, prompt: 'end' }),
-        wasPathFound === false ? React.createElement(
-            'div',
-            null,
-            React.createElement(
-                'h3',
-                null,
-                'No path has been found'
-            ),
-            React.createElement(
-                'p',
-                null,
-                'Try selecting different endpoints or increasing the fraction of roads'
-            )
-        ) : ""
+        React.createElement(ShowPathInfo, { path: path })
     );
 }
 
