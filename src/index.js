@@ -77,33 +77,32 @@ function ModeSelector({mode, setMode}) {
 }
 
 function CityNoSelector({cityNo, setCityNo}) {
-    const inputEl = React.useRef()
     const handleChange = (e) => {
-        setCityNo(parseInt(inputEl.current.value))
-        e.preventDefault()
+        let val = parseInt(e.target.value)
+        if (val < 2 || !val) val = 2
+        else if (val > 300) val = 300
+        setCityNo(val)
     }
-    return (<form onSubmit={handleChange}>
+    return (<form>
         <label>Enter no of cities:
         <input type="number" min="2" max="300"
-            defaultValue={cityNo} ref={inputEl}/>
+            value={cityNo} onChange={handleChange}/>
         </label>
-        <button type="sumbit">Save</button>
     </form>)
 }
 
 function RoadSelector({roadFr, setRoadFr}) {
-    const inputEl = React.useRef()
     const handleChange = (e) => {
-        const val = parseFloat(inputEl.current.value)
+        let val = parseFloat(e.target.value)
+        if (val < 0.5 || !val) val = 0.5
+        else if (val > 1) val = 1
         setRoadFr(val)
-        e.preventDefault()
     }
-    return (<form onSubmit={handleChange}>
+    return (<form >
         <label>Enter fraction of roads:
         <input type="number" min="0.5" max="1" step="0.01"
-            defaultValue={roadFr} ref={inputEl}/>
+            value={roadFr} onChange={handleChange}/>
         </label>
-        <button type="sumbit">Save</button>
     </form>)
 }
 
@@ -120,6 +119,7 @@ function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
     const handleChange = (e) => {
         let val = parseInt(e.target.value)
         if (val > maxNo) val = maxNo
+        if (val < 0 || !val) val = 0
         setCityNo(val)
     }
     return (
@@ -142,23 +142,24 @@ function App() {
         setWorld(new World(cityNo, roadFr))
     }, [cityNo, roadFr])
 
-    const [startCityId, setStartCityId] = React.useState(0)
-    const [endCityId, setEndCityId] = React.useState(1)
-    const path = mode === "bidirect"
-        ? world.findPathDikstra(startCityId, endCityId)
-        : world.salesmanSolver(solver, startCityId)
-    
-    clearCanvas()
-    drawRoads(world)
-    drawPath(path)
-    drawCities(world)
-
     if (cityNo > 10 && mode === "salesman" && ["dfs", "bfs"].includes(solver)) {
         alert(`Setting no of cities to ${cityNo} with the ${solver} \
         solver will resoult in the app freezing. Setting no of \
         cities back to 10.`)
         setCityNo(10)
     }
+
+    const [startCityId, setStartCityId] = React.useState(0)
+    const [endCityId, setEndCityId] = React.useState(1)
+    const path = mode === "bidirect"
+        ? world.findPathDikstra(startCityId, endCityId)
+        : world.salesmanSolver(solver, startCityId)
+    const wasPathFound = path !== -1
+    
+    clearCanvas()
+    drawRoads(world)
+    if (wasPathFound) drawPath(path)
+    drawCities(world)
 
     return (<div>
         <CityNoSelector cityNo={cityNo} setCityNo={setCityNo}/>
@@ -171,7 +172,12 @@ function App() {
             : <CitySelector cityNo={endCityId} setCityNo={setEndCityId}
             maxNo={cityNo-1} prompt="end" />
         }
-        
+        {wasPathFound === false
+            ? <div>
+                <h3>No path has been found</h3>
+                <p>Try selecting different endpoints or increasing the fraction of roads</p>
+            </div>
+            : ""}
     </div>)
 }
 

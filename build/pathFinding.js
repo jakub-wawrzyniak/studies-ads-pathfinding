@@ -275,7 +275,9 @@ class World {
             'mst': this.__mstSolver,
             'greedy': this.__greedySolver,
         }[method].bind(this)
-        return solver(path)
+        let answer = solver(path)
+        if (!answer) answer = -1
+        return answer
     }
 
     mergePaths(paths) {
