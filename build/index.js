@@ -123,7 +123,7 @@ function PlusMinus(_ref) {
 
     return React.createElement(
         'span',
-        null,
+        { className: 'plusminus' },
         React.createElement(
             'button',
             { onClick: function onClick() {
@@ -150,8 +150,8 @@ function ModeSelector(_ref2) {
     };
 
     return React.createElement(
-        'form',
-        null,
+        'div',
+        { className: 'selector radio' },
         React.createElement('input', { type: 'radio', name: 'mode', id: 'bidirect', value: 'bidirect',
             onChange: change, checked: mode === "bidirect" }),
         React.createElement(
@@ -179,14 +179,18 @@ function CityNoSelector(_ref3) {
         setCityNo(val);
     };
     return React.createElement(
-        'label',
-        null,
-        'Enter no of cities:',
-        React.createElement('input', { type: 'number', min: '2', max: '300',
-            value: cityNo, onChange: function onChange(e) {
-                return handleChange(e.target.value);
-            } }),
-        React.createElement(PlusMinus, { state: cityNo, setState: handleChange, step: 1 })
+        'div',
+        { className: 'selector' },
+        React.createElement(
+            'label',
+            null,
+            'Enter no of cities:',
+            React.createElement('input', { type: 'number', min: '2', max: '300',
+                value: cityNo, onChange: function onChange(e) {
+                    return handleChange(e.target.value);
+                } }),
+            React.createElement(PlusMinus, { state: cityNo, setState: handleChange, step: 1 })
+        )
     );
 }
 
@@ -200,14 +204,18 @@ function RoadSelector(_ref4) {
         setRoadFr(val);
     };
     return React.createElement(
-        'label',
-        null,
-        'Enter fraction of roads:',
-        React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
-            value: roadFr, onChange: function onChange(e) {
-                return handleChange(e.target.value);
-            } }),
-        React.createElement(PlusMinus, { state: roadFr, setState: handleChange, step: 0.01 })
+        'div',
+        { className: 'selector' },
+        React.createElement(
+            'label',
+            null,
+            'Enter fraction of roads:',
+            React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
+                value: roadFr, onChange: function onChange(e) {
+                    return handleChange(e.target.value);
+                } }),
+            React.createElement(PlusMinus, { state: roadFr, setState: handleChange, step: 0.01 })
+        )
     );
 }
 
@@ -216,29 +224,33 @@ function SolverSelector(_ref5) {
         setSolver = _ref5.setSolver;
 
     return React.createElement(
-        'select',
-        { onChange: function onChange(e) {
-                return setSolver(e.target.value);
-            }, value: solver },
+        'div',
+        { className: 'selector' },
         React.createElement(
-            'option',
-            { value: 'bfs' },
-            'breadth-first search'
-        ),
-        React.createElement(
-            'option',
-            { value: 'dfs' },
-            'depth-first search'
-        ),
-        React.createElement(
-            'option',
-            { value: 'greedy' },
-            'greedy search'
-        ),
-        React.createElement(
-            'option',
-            { value: 'mst' },
-            'minimum spanning tree'
+            'select',
+            { onChange: function onChange(e) {
+                    return setSolver(e.target.value);
+                }, value: solver },
+            React.createElement(
+                'option',
+                { value: 'bfs' },
+                'breadth-first search'
+            ),
+            React.createElement(
+                'option',
+                { value: 'dfs' },
+                'depth-first search'
+            ),
+            React.createElement(
+                'option',
+                { value: 'greedy' },
+                'greedy search'
+            ),
+            React.createElement(
+                'option',
+                { value: 'mst' },
+                'minimum spanning tree'
+            )
         )
     );
 }
@@ -256,16 +268,20 @@ function CitySelector(_ref6) {
         setCityNo(val);
     };
     return React.createElement(
-        'label',
-        null,
-        'Enter ',
-        prompt,
-        ' city id:',
-        React.createElement('input', { type: 'number', min: '0', max: maxNo,
-            value: cityNo, onChange: function onChange(e) {
-                return handleChange(e.target.value);
-            } }),
-        React.createElement(PlusMinus, { setState: handleChange, state: cityNo, step: 1 })
+        'div',
+        { className: 'selector' },
+        React.createElement(
+            'label',
+            null,
+            'Enter ',
+            prompt,
+            ' city id:',
+            React.createElement('input', { type: 'number', min: '0', max: maxNo,
+                value: cityNo, onChange: function onChange(e) {
+                    return handleChange(e.target.value);
+                } }),
+            React.createElement(PlusMinus, { setState: handleChange, state: cityNo, step: 1 })
+        )
     );
 }
 
@@ -273,7 +289,7 @@ function ShowPathInfo(_ref7) {
     var path = _ref7.path;
 
     if (path === -1) return React.createElement(
-        'ul',
+        React.Fragment,
         null,
         React.createElement(
             'h4',
@@ -281,14 +297,18 @@ function ShowPathInfo(_ref7) {
             'No path has been found'
         ),
         React.createElement(
-            'p',
+            'ul',
             null,
-            'Try selecting different endpoints or increasing the fraction of roads'
+            React.createElement(
+                'p',
+                null,
+                'Try selecting different endpoints or increasing the fraction of roads'
+            )
         )
     );
 
     return React.createElement(
-        'ul',
+        React.Fragment,
         null,
         React.createElement(
             'h4',
@@ -296,16 +316,27 @@ function ShowPathInfo(_ref7) {
             'Path details:'
         ),
         React.createElement(
-            'li',
+            'ul',
             null,
-            'path length: ',
-            Math.ceil(path.dist)
-        ),
-        React.createElement(
-            'li',
-            null,
-            'nodes in path: ',
-            path.nodes.length
+            React.createElement(
+                'li',
+                null,
+                'path length: ',
+                Math.ceil(path.dist)
+            ),
+            React.createElement(
+                'li',
+                null,
+                'nodes in path: ',
+                path.nodes.length
+            ),
+            React.createElement(
+                'li',
+                null,
+                'computation time: ',
+                path.calcTime,
+                'ms'
+            )
         )
     );
 }
@@ -357,7 +388,7 @@ function App() {
         setEndCityId = _React$useState14[1];
 
     var path = -1;
-    if (shouldCalcPath) path = mode === "bidirect" ? world.findPathDikstra(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
+    if (shouldCalcPath) path = mode === "bidirect" ? world.findPath(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
 
     clearCanvas();
     drawRoads(world);
@@ -365,15 +396,21 @@ function App() {
     drawCities(world);
 
     return React.createElement(
-        'div',
+        React.Fragment,
         null,
-        React.createElement(CityNoSelector, { cityNo: cityNo, setCityNo: setCityNo }),
-        React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),
-        React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
-        React.createElement(CitySelector, { cityNo: startCityId, setCityNo: setStartCityId,
-            maxNo: cityNo - 1, prompt: 'start' }),
-        mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : React.createElement(CitySelector, { cityNo: endCityId, setCityNo: setEndCityId,
-            maxNo: cityNo - 1, prompt: 'end' }),
+        React.createElement(
+            'form',
+            { onSubmit: function onSubmit(e) {
+                    return e.preventDefault();
+                } },
+            React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
+            React.createElement(CityNoSelector, { cityNo: cityNo, setCityNo: setCityNo }),
+            React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),
+            React.createElement(CitySelector, { cityNo: startCityId, setCityNo: setStartCityId,
+                maxNo: cityNo - 1, prompt: 'start' }),
+            mode === "salesman" ? React.createElement(SolverSelector, { solver: solver, setSolver: setSolver }) : React.createElement(CitySelector, { cityNo: endCityId, setCityNo: setEndCityId,
+                maxNo: cityNo - 1, prompt: 'end' })
+        ),
         React.createElement(ShowPathInfo, { path: path })
     );
 }

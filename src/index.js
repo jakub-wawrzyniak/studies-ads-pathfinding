@@ -59,7 +59,7 @@ function clearCanvas() {
 }
 
 function PlusMinus({state, setState, step}) {
-    return (<span>
+    return (<span className="plusminus">
         <button onClick={()=>setState(state+step)}>+</button>
         <button onClick={()=>setState(state-step)}>-</button>
     </span>)
@@ -72,14 +72,14 @@ function ModeSelector({mode, setMode}) {
     }
 
     return (
-        <form>
+        <div className="selector radio">
             <input type="radio" name="mode" id="bidirect" value="bidirect"
                 onChange={change} checked={mode === "bidirect"}/>
             <label htmlFor="bidirect">Bidirectional pathfinding</label>
             <input type="radio" name="mode" id="salesman" value="salesman"
                 onChange={change} checked={mode === "salesman"}/>
             <label htmlFor="salesman">Salesman problem</label>
-        </form>
+        </div>
     )
 }
 
@@ -90,11 +90,11 @@ function CityNoSelector({cityNo, setCityNo}) {
         else if (val > 300) val = 300
         setCityNo(val)
     }
-    return (<label>Enter no of cities:
+    return (<div className="selector"><label>Enter no of cities:
         <input type="number" min="2" max="300"
             value={cityNo} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={cityNo} setState={handleChange} step={1}/>
-        </label>)
+        </label></div>)
 }
 
 function RoadSelector({roadFr, setRoadFr}) {
@@ -104,20 +104,20 @@ function RoadSelector({roadFr, setRoadFr}) {
         else if (val > 1) val = 1
         setRoadFr(val)
     }
-    return (<label>Enter fraction of roads:
+    return (<div className="selector"><label>Enter fraction of roads:
         <input type="number" min="0.5" max="1" step="0.01"
             value={roadFr} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={roadFr} setState={handleChange} step={0.01}/>
-        </label>)
+        </label></div>)
 }
 
 function SolverSelector({solver, setSolver}) {
-    return (<select onChange={(e)=>setSolver(e.target.value)} value={solver}>
+    return (<div className="selector"><select onChange={(e)=>setSolver(e.target.value)} value={solver}>
         <option value="bfs">breadth-first search</option>
         <option value="dfs">depth-first search</option>
         <option value="greedy">greedy search</option>
         <option value="mst">minimum spanning tree</option>
-    </select>)
+    </select></div>)
 }
 
 function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
@@ -127,28 +127,29 @@ function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
         if (val < 0 || !val) val = 0
         setCityNo(val)
     }
-    return (
-        <label>
+    return (<div className="selector"><label>
         Enter {prompt} city id:
         <input type="number" min="0" max={maxNo}
             value={cityNo} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus setState={handleChange} state={cityNo} step={1} />
-        </label>
-    )
+    </label></div>)
 }
 
 function ShowPathInfo({path}) {
-    if (path === -1) return (<ul>
-        <h4>No path has been found</h4>
+    if (path === -1) return (<React.Fragment>
+    <h4>No path has been found</h4>
+    <ul>
         <p>Try selecting different endpoints
         or increasing the fraction of roads</p>
-    </ul>)
+    </ul></React.Fragment>)
 
-    return (<ul>
-        <h4>Path details:</h4>
+    return (<React.Fragment>
+    <h4>Path details:</h4>
+    <ul>
         <li>path length: {Math.ceil(path.dist)}</li>
         <li>nodes in path: {path.nodes.length}</li>
-    </ul>)
+        <li>computation time: {path.calcTime}ms</li>
+    </ul></React.Fragment>)
 }
 
 function App() {
@@ -156,7 +157,7 @@ function App() {
     const [roadFr, setRoadFr] = React.useState(1)
     const [mode, setMode] = React.useState("salesman")
     const [solver, setSolver] = React.useState("mst")
-    
+
     const [world, setWorld] = React.useState(new World(cityNo, roadFr))
     React.useEffect(() => {
         setWorld(new World(cityNo, roadFr))
@@ -172,7 +173,7 @@ function App() {
     const [endCityId, setEndCityId] = React.useState(1)
     let path = -1
     if (shouldCalcPath) path = mode === "bidirect"
-        ? world.findPathDikstra(startCityId, endCityId)
+        ? world.findPath(startCityId, endCityId)
         : world.salesmanSolver(solver, startCityId)
     
     clearCanvas()
@@ -180,10 +181,11 @@ function App() {
     if (path !== -1) drawPath(path)
     drawCities(world)
 
-    return (<div>
+    return (<React.Fragment>
+    <form onSubmit={e=>e.preventDefault()}>
+        <ModeSelector mode={mode} setMode={setMode}/>
         <CityNoSelector cityNo={cityNo} setCityNo={setCityNo}/>
         <RoadSelector roadFr={roadFr} setRoadFr={setRoadFr}/>
-        <ModeSelector mode={mode} setMode={setMode}/>
         <CitySelector cityNo={startCityId} setCityNo={setStartCityId}
             maxNo={cityNo-1} prompt="start" />
         {mode === "salesman"
@@ -191,9 +193,10 @@ function App() {
             : <CitySelector cityNo={endCityId} setCityNo={setEndCityId}
             maxNo={cityNo-1} prompt="end" />
         }
-        <ShowPathInfo path={path}/>
-    </div>)
+    </form>
+    <ShowPathInfo path={path}/>
+    </React.Fragment>)
 }
 
-  const root = document.querySelector('#root');
-  ReactDOM.render(<App/>, root)
+const root = document.querySelector('#root');
+ReactDOM.render(<App/>, root)

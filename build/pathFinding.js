@@ -275,49 +275,17 @@ class World {
             'mst': this.__mstSolver,
             'greedy': this.__greedySolver,
         }[method].bind(this)
+
+        const t0 = Date.now()
         let answer = solver(path)
         if (!answer) answer = -1
+        else answer.calcTime = Date.now() - t0
+
         return answer
     }
 
-    mergePaths(paths) {
-        for (let path1 of paths.from1) {
-            for (let path2 of paths.from2) {
-                if (path1.end == path2.end) {
-                    const path = path1.copy()
-                    path.nodes.pop()
-                    path2.nodes.reverse().forEach(
-                        n => path.extend(n))
-                    return path
-        }}}
-        return -1
-    }
-
     findPath(city1Id, city2Id) {
-        const paths = {
-            from1: [new Path(this.cities[city1Id])],
-            from2: [new Path(this.cities[city2Id])]
-        }
-        let path = this.mergePaths(paths);
-        while (path === -1) {
-            for (let [key, from] of Object.entries(paths)) {
-                const newPaths = []
-                for (let p of from) {
-                    p.end.sortNeighbours()
-                    const nextCities = p.end.neighbours.filter(
-                        n => !p.nodes.includes(n))
-                    nextCities.forEach(
-                        c => newPaths.push(p.copy().extend(c)))
-                }
-                paths[key] = newPaths
-                path = this.mergePaths(paths)
-                if (path !== -1) break
-            }
-        }
-        return path
-    }
-
-    findPathDikstra(city1Id, city2Id) {
+        const t0 = Date.now()
         const processed1 = []
         const processed2 = []
         const unprocessed1 = [...this.cities]
@@ -384,6 +352,7 @@ class World {
             }
         }
 
+        if (bestPath !== -1) bestPath.calcTime = Date.now() - t0
         return bestPath
     }
 }
