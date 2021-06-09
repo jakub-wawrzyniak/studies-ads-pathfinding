@@ -90,10 +90,12 @@ function CityNoSelector({cityNo, setCityNo}) {
         else if (val > 300) val = 300
         setCityNo(val)
     }
-    return (<div className="selector"><label>Enter no of cities:
+    return (<div className="selector number"><label>Enter no of cities:
+        <span>
         <input type="number" min="2" max="300"
             value={cityNo} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={cityNo} setState={handleChange} step={1}/>
+        </span>
         </label></div>)
 }
 
@@ -104,11 +106,13 @@ function RoadSelector({roadFr, setRoadFr}) {
         else if (val > 1) val = 1
         setRoadFr(val)
     }
-    return (<div className="selector"><label>Enter fraction of roads:
+    return (<div className="selector number"><label>Enter fraction of roads:
+    <span>
         <input type="number" min="0.5" max="1" step="0.01"
             value={roadFr} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={roadFr} setState={handleChange} step={0.01}/>
-        </label></div>)
+    </span>
+    </label></div>)
 }
 
 function SolverSelector({solver, setSolver}) {
@@ -127,11 +131,13 @@ function CitySelector({cityNo, setCityNo, maxNo, prompt}) {
         if (val < 0 || !val) val = 0
         setCityNo(val)
     }
-    return (<div className="selector"><label>
-        Enter {prompt} city id:
+    return (<div className="selector number"><label>
+    Enter {prompt} city id:
+    <span>
         <input type="number" min="0" max={maxNo}
             value={cityNo} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus setState={handleChange} state={cityNo} step={1} />
+    </span>
     </label></div>)
 }
 

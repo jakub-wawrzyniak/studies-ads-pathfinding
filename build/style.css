@@ -5,16 +5,25 @@
     font-family: Roboto;
 }
 
-h2 {
-    text-align: center;
+h2, h4, p, li, label, option, select {
     color: var(--theme-color);
+}
+
+h2, option, select {
+    text-align: center;
+}
+
+p, li, label, option, select {
+    font-size: 1rem;
+}
+
+h2 {
     font-weight: 300;
     font-size: 2rem;
 }
 
 h4 {
-    color: var(--theme-color);
-    margin: 0.5rem 0;
+    margin: 0.5rem;
 }
 
 body {
@@ -29,16 +38,34 @@ canvas {
     border: 2px solid var(--theme-color);
 }
 
+main {
+    display: flex;
+    flex-direction: row;
+}
+
+#root {
+    margin: 0 1rem;
+}
+
 form {
     margin: 1.5em 0;
+}
+
+label {
+    margin: 0 0.5rem;
 }
 
 .selector {
     margin: 0.5rem 0;
 }
 
-.selector.radio {
+.radio {
     margin: 1.5rem 0;
+}
+
+.number label, .radio {
+    display: flex;
+    justify-content: space-between;
 }
 
 input[type=number]::-webkit-inner-spin-button, 
@@ -99,6 +126,10 @@ select {
 }
 
 ul {
-    margin: 0.5em 0;
+    margin: 1rem 0;
     padding-left: 1.5rem;
+}
+
+li {
+    margin: 0.5rem 0;
 }

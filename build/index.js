@@ -180,16 +180,20 @@ function CityNoSelector(_ref3) {
     };
     return React.createElement(
         'div',
-        { className: 'selector' },
+        { className: 'selector number' },
         React.createElement(
             'label',
             null,
             'Enter no of cities:',
-            React.createElement('input', { type: 'number', min: '2', max: '300',
-                value: cityNo, onChange: function onChange(e) {
-                    return handleChange(e.target.value);
-                } }),
-            React.createElement(PlusMinus, { state: cityNo, setState: handleChange, step: 1 })
+            React.createElement(
+                'span',
+                null,
+                React.createElement('input', { type: 'number', min: '2', max: '300',
+                    value: cityNo, onChange: function onChange(e) {
+                        return handleChange(e.target.value);
+                    } }),
+                React.createElement(PlusMinus, { state: cityNo, setState: handleChange, step: 1 })
+            )
         )
     );
 }
@@ -205,16 +209,20 @@ function RoadSelector(_ref4) {
     };
     return React.createElement(
         'div',
-        { className: 'selector' },
+        { className: 'selector number' },
         React.createElement(
             'label',
             null,
             'Enter fraction of roads:',
-            React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
-                value: roadFr, onChange: function onChange(e) {
-                    return handleChange(e.target.value);
-                } }),
-            React.createElement(PlusMinus, { state: roadFr, setState: handleChange, step: 0.01 })
+            React.createElement(
+                'span',
+                null,
+                React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
+                    value: roadFr, onChange: function onChange(e) {
+                        return handleChange(e.target.value);
+                    } }),
+                React.createElement(PlusMinus, { state: roadFr, setState: handleChange, step: 0.01 })
+            )
         )
     );
 }
@@ -269,18 +277,22 @@ function CitySelector(_ref6) {
     };
     return React.createElement(
         'div',
-        { className: 'selector' },
+        { className: 'selector number' },
         React.createElement(
             'label',
             null,
             'Enter ',
             prompt,
             ' city id:',
-            React.createElement('input', { type: 'number', min: '0', max: maxNo,
-                value: cityNo, onChange: function onChange(e) {
-                    return handleChange(e.target.value);
-                } }),
-            React.createElement(PlusMinus, { setState: handleChange, state: cityNo, step: 1 })
+            React.createElement(
+                'span',
+                null,
+                React.createElement('input', { type: 'number', min: '0', max: maxNo,
+                    value: cityNo, onChange: function onChange(e) {
+                        return handleChange(e.target.value);
+                    } }),
+                React.createElement(PlusMinus, { setState: handleChange, state: cityNo, step: 1 })
+            )
         )
     );
 }
