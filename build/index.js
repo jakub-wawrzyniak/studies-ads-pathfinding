@@ -169,9 +169,37 @@ function ModeSelector(_ref2) {
     );
 }
 
-function CityNoSelector(_ref3) {
-    var cityNo = _ref3.cityNo,
-        setCityNo = _ref3.setCityNo;
+function ConnectionModeSelector(_ref3) {
+    var mode = _ref3.mode,
+        setMode = _ref3.setMode;
+
+    var change = function change() {
+        if (mode === "nearest") setMode("random");else setMode("nearest");
+    };
+
+    return React.createElement(
+        'div',
+        { className: 'selector radio' },
+        React.createElement('input', { type: 'radio', name: 'connectionMode', id: 'nearest', value: 'nearest',
+            onChange: change, checked: mode === "nearest" }),
+        React.createElement(
+            'label',
+            { htmlFor: 'nearest' },
+            'Connect nearest cities'
+        ),
+        React.createElement('input', { type: 'radio', name: 'connectionMode', id: 'random', value: 'random',
+            onChange: change, checked: mode === "random" }),
+        React.createElement(
+            'label',
+            { htmlFor: 'random' },
+            'Connect random cities'
+        )
+    );
+}
+
+function CityNoSelector(_ref4) {
+    var cityNo = _ref4.cityNo,
+        setCityNo = _ref4.setCityNo;
 
     var handleChange = function handleChange(val) {
         val = parseInt(val);
@@ -198,13 +226,13 @@ function CityNoSelector(_ref3) {
     );
 }
 
-function RoadSelector(_ref4) {
-    var roadFr = _ref4.roadFr,
-        setRoadFr = _ref4.setRoadFr;
+function RoadSelector(_ref5) {
+    var roadFr = _ref5.roadFr,
+        setRoadFr = _ref5.setRoadFr;
 
     var handleChange = function handleChange(val) {
         val = parseFloat(val);
-        if (val < 0.2 || !val) val = 0.2;else if (val > 1) val = 1;
+        if (val < 0.05 || !val) val = 0.05;else if (val > 1) val = 1;
         setRoadFr(val);
     };
     return React.createElement(
@@ -217,7 +245,7 @@ function RoadSelector(_ref4) {
             React.createElement(
                 'span',
                 null,
-                React.createElement('input', { type: 'number', min: '0.2', max: '1', step: '0.01',
+                React.createElement('input', { type: 'number', min: '0.05', max: '1', step: '0.01',
                     value: roadFr, onChange: function onChange(e) {
                         return handleChange(e.target.value);
                     } }),
@@ -227,9 +255,9 @@ function RoadSelector(_ref4) {
     );
 }
 
-function SolverSelector(_ref5) {
-    var solver = _ref5.solver,
-        setSolver = _ref5.setSolver;
+function SolverSelector(_ref6) {
+    var solver = _ref6.solver,
+        setSolver = _ref6.setSolver;
 
     return React.createElement(
         'div',
@@ -263,11 +291,11 @@ function SolverSelector(_ref5) {
     );
 }
 
-function CitySelector(_ref6) {
-    var cityNo = _ref6.cityNo,
-        setCityNo = _ref6.setCityNo,
-        maxNo = _ref6.maxNo,
-        prompt = _ref6.prompt;
+function CitySelector(_ref7) {
+    var cityNo = _ref7.cityNo,
+        setCityNo = _ref7.setCityNo,
+        maxNo = _ref7.maxNo,
+        prompt = _ref7.prompt;
 
     var handleChange = function handleChange(val) {
         val = parseInt(val);
@@ -297,8 +325,8 @@ function CitySelector(_ref6) {
     );
 }
 
-function ShowPathInfo(_ref7) {
-    var path = _ref7.path;
+function ShowPathInfo(_ref8) {
+    var path = _ref8.path;
 
     if (path === -1) return React.createElement(
         React.Fragment,
@@ -369,19 +397,24 @@ function App() {
         mode = _React$useState6[0],
         setMode = _React$useState6[1];
 
-    var _React$useState7 = React.useState("mst"),
+    var _React$useState7 = React.useState("nearest"),
         _React$useState8 = _slicedToArray(_React$useState7, 2),
-        solver = _React$useState8[0],
-        setSolver = _React$useState8[1];
+        connectionMode = _React$useState8[0],
+        setConnectionMode = _React$useState8[1];
 
-    var _React$useState9 = React.useState(new World(cityNo, roadFr)),
+    var _React$useState9 = React.useState("mst"),
         _React$useState10 = _slicedToArray(_React$useState9, 2),
-        world = _React$useState10[0],
-        setWorld = _React$useState10[1];
+        solver = _React$useState10[0],
+        setSolver = _React$useState10[1];
+
+    var _React$useState11 = React.useState(new World(cityNo, roadFr, connectionMode)),
+        _React$useState12 = _slicedToArray(_React$useState11, 2),
+        world = _React$useState12[0],
+        setWorld = _React$useState12[1];
 
     React.useEffect(function () {
-        setWorld(new World(cityNo, roadFr));
-    }, [cityNo, roadFr]);
+        setWorld(new World(cityNo, roadFr, connectionMode));
+    }, [cityNo, roadFr, connectionMode]);
 
     var shouldCalcPath = cityNo <= 10 || mode === "bidirect" || !["dfs", "bfs"].includes(solver);
     if (!shouldCalcPath) {
@@ -389,15 +422,15 @@ function App() {
         setCityNo(10);
     }
 
-    var _React$useState11 = React.useState(0),
-        _React$useState12 = _slicedToArray(_React$useState11, 2),
-        startCityId = _React$useState12[0],
-        setStartCityId = _React$useState12[1];
-
-    var _React$useState13 = React.useState(1),
+    var _React$useState13 = React.useState(0),
         _React$useState14 = _slicedToArray(_React$useState13, 2),
-        endCityId = _React$useState14[0],
-        setEndCityId = _React$useState14[1];
+        startCityId = _React$useState14[0],
+        setStartCityId = _React$useState14[1];
+
+    var _React$useState15 = React.useState(1),
+        _React$useState16 = _slicedToArray(_React$useState15, 2),
+        endCityId = _React$useState16[0],
+        setEndCityId = _React$useState16[1];
 
     var path = -1;
     if (shouldCalcPath) path = mode === "bidirect" ? world.findPath(startCityId, endCityId) : world.salesmanSolver(solver, startCityId);
@@ -415,6 +448,7 @@ function App() {
             { onSubmit: function onSubmit(e) {
                     return e.preventDefault();
                 } },
+            React.createElement(ConnectionModeSelector, { mode: connectionMode, setMode: setConnectionMode }),
             React.createElement(ModeSelector, { mode: mode, setMode: setMode }),
             React.createElement(CityNoSelector, { cityNo: cityNo, setCityNo: setCityNo }),
             React.createElement(RoadSelector, { roadFr: roadFr, setRoadFr: setRoadFr }),

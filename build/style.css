@@ -1,6 +1,6 @@
 * {
     --theme-color: #222;
-    --second-color: #999;
+    --second-color: #bbb;
     --radius: calc(1.5rem / 4);
     font-family: Roboto;
 }
@@ -60,7 +60,7 @@ label {
 }
 
 .radio {
-    margin: 1.5rem 0;
+    margin: 0.7rem 0;
 }
 
 .number label, .radio {

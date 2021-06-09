@@ -83,6 +83,22 @@ function ModeSelector({mode, setMode}) {
     )
 }
 
+function ConnectionModeSelector({mode, setMode}) {
+    const change = () => {
+        if (mode === "nearest") setMode("random")
+        else setMode("nearest")
+    }
+
+    return (<div className="selector radio">
+        <input type="radio" name="connectionMode" id="nearest" value="nearest"
+            onChange={change} checked={mode === "nearest"}/>
+        <label htmlFor="nearest">Connect nearest cities</label>
+        <input type="radio" name="connectionMode" id="random" value="random"
+            onChange={change} checked={mode === "random"}/>
+        <label htmlFor="random">Connect random cities</label>
+    </div>)
+}
+
 function CityNoSelector({cityNo, setCityNo}) {
     const handleChange = (val) => {
         val = parseInt(val)
@@ -102,13 +118,13 @@ function CityNoSelector({cityNo, setCityNo}) {
 function RoadSelector({roadFr, setRoadFr}) {
     const handleChange = (val) => {
         val = parseFloat(val)
-        if (val < 0.2 || !val) val = 0.2
+        if (val < 0.05 || !val) val = 0.05
         else if (val > 1) val = 1
         setRoadFr(val)
     }
     return (<div className="selector number"><label>Enter fraction of roads:
     <span>
-        <input type="number" min="0.2" max="1" step="0.01"
+        <input type="number" min="0.05" max="1" step="0.01"
             value={roadFr} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={roadFr} setState={handleChange} step={0.01}/>
     </span>
@@ -162,12 +178,13 @@ function App() {
     const [cityNo, setCityNo] = React.useState(10)
     const [roadFr, setRoadFr] = React.useState(1)
     const [mode, setMode] = React.useState("salesman")
+    const [connectionMode, setConnectionMode] = React.useState("nearest")
     const [solver, setSolver] = React.useState("mst")
 
-    const [world, setWorld] = React.useState(new World(cityNo, roadFr))
+    const [world, setWorld] = React.useState(new World(cityNo, roadFr, connectionMode))
     React.useEffect(() => {
-        setWorld(new World(cityNo, roadFr))
-    }, [cityNo, roadFr])
+        setWorld(new World(cityNo, roadFr, connectionMode))
+    }, [cityNo, roadFr, connectionMode])
 
     const shouldCalcPath = cityNo <= 10 || mode === "bidirect" || !["dfs", "bfs"].includes(solver)
     if (!shouldCalcPath) {
@@ -189,6 +206,7 @@ function App() {
 
     return (<React.Fragment>
     <form onSubmit={e=>e.preventDefault()}>
+        <ConnectionModeSelector mode={connectionMode} setMode={setConnectionMode} />
         <ModeSelector mode={mode} setMode={setMode}/>
         <CityNoSelector cityNo={cityNo} setCityNo={setCityNo}/>
         <RoadSelector roadFr={roadFr} setRoadFr={setRoadFr}/>

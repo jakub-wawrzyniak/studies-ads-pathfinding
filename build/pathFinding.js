@@ -131,7 +131,7 @@ class World {
         this.cities = range(howManyCities).map(id => new City(id))
         
         try {
-            connectionMethod == "random"
+            connectionMethod == "nearest"
                 ? this.connectNearestCities(fractionOfRoads)
                 : this.connectRandomCities(fractionOfRoads)
             this.makeMstTree()
@@ -419,7 +419,7 @@ function testBidirectSearch() {
     const FRACTION_OF_ROADS = 0.1 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
-    const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
+    const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS, "nearest")
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
     const paths = []
@@ -437,5 +437,5 @@ function testBidirectSearch() {
 }
 
 // Functions below can be used either in node.js or in the browser
-testSalesman()
+// testSalesman()
 // testBidirectSearch()
