@@ -125,10 +125,25 @@ function chooseBetterPath(path1, path2) {
 }
 
 class World {
-    constructor(howManyCities, fractionOfRoads) {
+    constructor(howManyCities, fractionOfRoads, connectionMethod) {
         this.mstTree = undefined
+        this.roads = []
         this.cities = range(howManyCities).map(id => new City(id))
+        
+        try {
+            connectionMethod == "random"
+                ? this.connectNearestCities(fractionOfRoads)
+                : this.connectRandomCities(fractionOfRoads)
+            this.makeMstTree()
+        } catch {
+            const alternative = new World(howManyCities, fractionOfRoads, connectionMethod)
+            this.mstTree = alternative.mstTree
+            this.roads = alternative.roads
+            this.cities = alternative.cities
+        }
+    }
 
+    connectRandomCities(fractionOfRoads) {
         const pairs = newton(this.cities)
         const noOfRoads = Math.ceil(fractionOfRoads * pairs.length)
         this.roads = getRandArr(pairs, noOfRoads)
@@ -138,6 +153,29 @@ class World {
             const dist = getDist(city1, city2)
             city1.connect(city2, dist)
             city2.connect(city1, dist)
+        }
+    }
+
+    connectNearestCities(fractionOfRoads) {
+        const noOfRoads = Math.ceil(fractionOfRoads * (this.cities.length-1))
+        for (let city of this.cities) {
+            const distDict = {}
+            for (let neighbour of this.cities) {
+                if (neighbour === city) continue
+                if (city.neighbours.includes(neighbour)) continue
+                distDict[getDist(city, neighbour)] = neighbour.id
+            }
+
+            const toConnect = noOfRoads - city.neighbours.length
+            const distances = Object.keys(distDict).sort((a,b) =>a-b)
+
+            for (let i = 0; i < toConnect; i++) {
+                const dist = parseFloat(distances[i])
+                const neighbour = this.cities[distDict[dist]]
+                city.connect(neighbour, dist)
+                neighbour.connect(city, dist)
+                this.roads.push([city, neighbour])
+            }
         }
     }
 
@@ -284,7 +322,7 @@ class World {
         return answer
     }
 
-    findPath(city1Id, city2Id) {
+    findPath(city1Id=0, city2Id=1) {
         const t0 = Date.now()
         const processed1 = []
         const processed2 = []
@@ -358,15 +396,15 @@ class World {
 }
 
 function testSalesman() {
-    const HOW_MANY_CITIES = 300
-    const FRACTION_OF_ROADS = 0.8 // 0.8 = 80% of all roads
+    const HOW_MANY_CITIES = 50
+    const FRACTION_OF_ROADS = 0.05 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
     console.log(`Cities created, distances calculated in ${(Date.now()-t)/1000}s`)
     
     const paths=[]
-    for (let method of ['bfs', 'dfs', 'mst', 'greedy']) {
+    for (let method of ['mst']) {
         console.log()
         t = Date.now()
         let path = world.salesmanSolver(method)
@@ -377,8 +415,8 @@ function testSalesman() {
 }
 
 function testBidirectSearch() {
-    const HOW_MANY_CITIES = 300
-    const FRACTION_OF_ROADS = 0.2 // 0.8 = 80% of all roads
+    const HOW_MANY_CITIES = 50
+    const FRACTION_OF_ROADS = 0.1 // 0.8 = 80% of all roads
     let t;
     t = Date.now()
     const world = new World(HOW_MANY_CITIES, FRACTION_OF_ROADS)
@@ -390,7 +428,7 @@ function testBidirectSearch() {
         const city2Id = Math.floor(HOW_MANY_CITIES*Math.random())
         console.log()
         t = Date.now()
-        let path = world.findPathDikstra(city1Id, city2Id)
+        let path = world.findPath(city1Id, city2Id)
         console.log(`Path between ${city1Id} and ${city2Id} found in ${(Date.now()-t)/1000}s`)
         console.log(`Distance: ${path.dist}; Nodes: ${path.nodes.length}`)
         paths.push(path)
@@ -399,5 +437,5 @@ function testBidirectSearch() {
 }
 
 // Functions below can be used either in node.js or in the browser
-// testSalesman()
+testSalesman()
 // testBidirectSearch()

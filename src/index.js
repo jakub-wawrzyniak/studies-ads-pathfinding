@@ -102,13 +102,13 @@ function CityNoSelector({cityNo, setCityNo}) {
 function RoadSelector({roadFr, setRoadFr}) {
     const handleChange = (val) => {
         val = parseFloat(val)
-        if (val < 0.5 || !val) val = 0.5
+        if (val < 0.2 || !val) val = 0.2
         else if (val > 1) val = 1
         setRoadFr(val)
     }
     return (<div className="selector number"><label>Enter fraction of roads:
     <span>
-        <input type="number" min="0.5" max="1" step="0.01"
+        <input type="number" min="0.2" max="1" step="0.01"
             value={roadFr} onChange={e=>handleChange(e.target.value)}/>
         <PlusMinus state={roadFr} setState={handleChange} step={0.01}/>
     </span>

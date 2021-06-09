@@ -204,7 +204,7 @@ function RoadSelector(_ref4) {
 
     var handleChange = function handleChange(val) {
         val = parseFloat(val);
-        if (val < 0.5 || !val) val = 0.5;else if (val > 1) val = 1;
+        if (val < 0.2 || !val) val = 0.2;else if (val > 1) val = 1;
         setRoadFr(val);
     };
     return React.createElement(
@@ -217,7 +217,7 @@ function RoadSelector(_ref4) {
             React.createElement(
                 'span',
                 null,
-                React.createElement('input', { type: 'number', min: '0.5', max: '1', step: '0.01',
+                React.createElement('input', { type: 'number', min: '0.2', max: '1', step: '0.01',
                     value: roadFr, onChange: function onChange(e) {
                         return handleChange(e.target.value);
                     } }),
