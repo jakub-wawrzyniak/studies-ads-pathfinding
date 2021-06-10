@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel src --out-dir build --presets react-app/prod"
+    "start": "babel src --out-dir build/scripts --presets react-app/prod"
   },
   "keywords": [],
   "author": "",
