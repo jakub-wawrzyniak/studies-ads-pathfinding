@@ -100,5 +100,5 @@ Problems:
 Extentions:
     adding animated path finding
     adding webworkers
-    adding info for 
+    
 */
